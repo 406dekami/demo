@@ -1,0 +1,1 @@
+export { AddedModel } from './AddedModel'

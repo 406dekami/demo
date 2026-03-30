@@ -1,0 +1,7 @@
+/backend/.venv/
+/my-rag-frontend/node_modules
+/.idea
+/backend/storage/
+/backend/app/data/
+/backend/logs/
+/backend/.env

@@ -1,0 +1,38 @@
+source_id,target_id,relationship_type,description
+N001,N002,CONTAINS,课程包含基础知识模块
+N001,N007,CONTAINS,课程包含逻辑函数化简模块
+N001,N010,CONTAINS,课程包含组合逻辑电路模块
+N001,N014,CONTAINS,课程包含触发器模块
+N001,N017,CONTAINS,课程包含时序逻辑电路模块
+N001,N021,CONTAINS,课程包含计数器模块
+N001,N024,CONTAINS,课程包含寄存器模块
+N001,N026,CONTAINS,课程包含 555 定时器模块
+N002,N003,CONTAINS,基础知识包含数制与编码
+N002,N004,CONTAINS,基础知识包含逻辑门电路
+N002,N005,CONTAINS,基础知识包含布尔代数定理
+N002,N006,CONTAINS,基础知识包含标准形式
+N007,N008,CONTAINS,化简模块包含卡诺图
+N007,N009,CONTAINS,化简模块包含逻辑变换
+N010,N011,CONTAINS,组合电路包含分析与设计
+N010,N012,CONTAINS,组合电路包含常用集成电路
+N010,N013,CONTAINS,组合电路包含竞争与冒险
+N014,N015,CONTAINS,触发器包含类型与方程
+N014,N016,CONTAINS,触发器包含功能转换
+N017,N018,CONTAINS,时序电路包含三大方程
+N017,N019,CONTAINS,时序电路包含同步与异步
+N017,N020,CONTAINS,时序电路包含设计实例
+N021,N022,CONTAINS,计数器包含 74LS290 芯片
+N021,N023,CONTAINS,计数器包含任意进制设计
+N024,N025,CONTAINS,寄存器包含移位寄存器
+N026,N027,CONTAINS,555 定时器包含脉冲产生与整形
+N002,N007,PREREQUISITE,学习化简前需掌握基础知识
+N007,N010,PREREQUISITE,设计组合电路前需会化简
+N010,N014,PREREQUISITE,学习触发器前需懂组合电路
+N014,N017,PREREQUISITE,时序电路基于触发器构建
+N017,N021,PREREQUISITE,计数器是时序电路的应用
+N017,N024,PREREQUISITE,寄存器是时序电路的应用
+N005,N008,DERIVES,卡诺图是布尔代数的图形化衍生
+N015,N016,DERIVES,功能转换基于触发器特性方程
+N018,N020,DERIVES,设计实例基于三大方程
+N022,N023,DERIVES,任意进制设计基于 74LS290 芯片
+N025,N027,DERIVES,脉冲整形可借助移位寄存器
