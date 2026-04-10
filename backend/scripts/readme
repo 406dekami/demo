@@ -1,0 +1,16 @@
+使用方法：
+1.
+确保 CSV 文件在 Neo4j 的导入目录
+# 复制 CSV 到 Neo4j import 目录
+docker cp backend/data/seeds/nodes.csv digital_logic_neo4j:/var/lib/neo4j/import/
+docker cp backend/data/seeds/relationships.csv digital_logic_neo4j:/var/lib/neo4j/import/
+2.
+在 Neo4j Browser 中运行
+◦
+打开 http://localhost:7474
+◦
+连接 Neo4j (密码：DigitalLogic2024)
+◦
+运行：
+:source /var/lib/neo4j/import/scripts/import.cypher
+或者直接粘贴脚本内容运行
