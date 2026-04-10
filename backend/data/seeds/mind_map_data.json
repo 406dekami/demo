@@ -1,0 +1,1478 @@
+{
+  "metadata": {
+    "course": "数字逻辑电路期末复习",
+    "version": "1.0",
+    "created_at": "2026-04-03",
+    "description": "基于手工构建的课程思维导图，定义四级知识层级与三类核心关系"
+  },
+  "knowledge_levels": {
+    "0": "course",
+    "1": "chapter",
+    "2": "section",
+    "3": "principle",
+    "4": "circuit",
+    "5": "application"
+  },
+  "node_types": {
+    "course": "课程",
+    "chapter": "章节",
+    "section": "小节",
+    "concept": "概念",
+    "principle": "原理",
+    "circuit": "电路",
+    "application": "应用"
+  },
+  "relationship_types": [
+    "contains",
+    "prerequisite",
+    "derives"
+  ],
+  "nodes": [
+    {
+      "id": "root",
+      "parent_id": null,
+      "name": "数字逻辑电路期末复习",
+      "level": 0,
+      "node_type": "course",
+      "description": "数字逻辑电路课程完整知识体系",
+      "order_index": 0,
+      "is_leaf": false,
+      "color": "#3b82f6",
+      "tags": ["课程", "总览"],
+      "related_questions": ["这门课程主要讲什么？", "学习路线是怎样的？"]
+    },
+    {
+      "id": "chapter-1",
+      "parent_id": "root",
+      "name": "1. 基础知识 (Basics)",
+      "level": 1,
+      "node_type": "chapter",
+      "description": "数字逻辑的基础概念和基本定理",
+      "order_index": 0,
+      "is_leaf": false,
+      "color": "#10b981",
+      "tags": ["基础", "入门"],
+      "related_questions": ["基础知识包含哪些内容？", "为什么要学习数制转换？"]
+    },
+    {
+      "id": "section-1-1",
+      "parent_id": "chapter-1",
+      "name": "数制与编码",
+      "level": 2,
+      "node_type": "section",
+      "description": "不同进制及其转换方法，是数字逻辑的基础",
+      "order_index": 0,
+      "is_leaf": false,
+      "color": "#6ee7b7",
+      "tags": ["概念", "数制"],
+      "related_questions": ["有哪些常用的数制？", "如何进行进制转换？"]
+    },
+    {
+      "id": "point-1-1-1",
+      "parent_id": "section-1-1",
+      "name": "进制转换：十-八-二-十六进制",
+      "level": 3,
+      "node_type": "principle",
+      "description": "十进制、八进制、二进制、十六进制之间的转换规则",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#a7f3d0",
+      "tags": ["原理", "转换"],
+      "content": "整数部分：除基取余法；小数部分：乘基取整法",
+      "examples": ["十进制 25 转二进制：25 ÷ 2 = 12 余 1, 12 ÷ 2 = 6 余 0, 6 ÷ 2 = 3 余 0, 3 ÷ 2 = 1 余 1, 1 ÷ 2 = 0 余 1，结果为 11001"],
+      "related_questions": ["十进制如何转二进制？", "小数部分怎么转换？", "十六进制有什么好处？"]
+    },
+    {
+      "id": "point-1-1-2",
+      "parent_id": "section-1-1",
+      "name": "编码：8421码, 5421码, 余3码(Excess-3)",
+      "level": 3,
+      "node_type": "concept",
+      "description": "BCD 码的常见编码方式及其应用",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#a7f3d0",
+      "tags": ["概念", "编码"],
+      "content": "BCD (Binary-Coded Decimal)：用 4 位二进制表示 1 位十进制数",
+      "examples": ["十进制 9 的 8421 码：1001", "十进制 9 的余 3 码：1100 (9+3=12 的二进制)"],
+      "related_questions": ["什么是 8421 码？", "余 3 码有什么特点？", "BCD 码有什么用？"]
+    },
+    {
+      "id": "section-1-2",
+      "parent_id": "chapter-1",
+      "name": "逻辑门电路",
+      "level": 2,
+      "node_type": "section",
+      "description": "基本逻辑门及其符号表示，是构建复杂电路的基础",
+      "order_index": 1,
+      "is_leaf": false,
+      "color": "#6ee7b7",
+      "tags": ["概念", "逻辑门"],
+      "related_questions": ["有哪些基本逻辑门？", "逻辑门的符号有哪些标准？"]
+    },
+    {
+      "id": "point-1-2-1",
+      "parent_id": "section-1-2",
+      "name": "符号：矩形符号(Rectangular) vs 特定形状(Specified Shapes)",
+      "level": 3,
+      "node_type": "concept",
+      "description": "Rectangular vs Specified Shapes 两种符号标准",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#a7f3d0",
+      "tags": ["概念", "符号"],
+      "related_questions": ["逻辑门符号有哪两种标准？", "矩形符号和特定形状有什么区别？"]
+    },
+    {
+      "id": "point-1-2-2",
+      "parent_id": "section-1-2",
+      "name": "类型：AND, OR, NOT, XOR(异或), XNOR(同或)",
+      "level": 3,
+      "node_type": "circuit",
+      "description": "与、或、非、异或、同或等基本逻辑门的真值表和符号",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#a7f3d0",
+      "tags": ["电路", "逻辑门"],
+      "content": "AND：全 1 出 1；OR：有 1 出 1；NOT：取反；XOR：相异为 1；XNOR：相同为 1",
+      "truth_table": {"AND": "00→0, 01→0, 10→0, 11→1", "XOR": "00→0, 01→1, 10→1, 11→0"},
+      "related_questions": ["AND 门和 OR 门有什么区别？", "什么是异或门？", "逻辑门的符号标准有哪些？"]
+    },
+    {
+      "id": "section-1-3",
+      "parent_id": "chapter-1",
+      "name": "布尔代数定理",
+      "level": 2,
+      "node_type": "section",
+      "description": "布尔代数的基本定理和规则，用于逻辑表达式化简",
+      "order_index": 2,
+      "is_leaf": false,
+      "color": "#6ee7b7",
+      "tags": ["概念", "布尔代数"],
+      "related_questions": ["布尔代数有哪些基本定理？", "如何应用这些定理化简表达式？"]
+    },
+    {
+      "id": "point-1-3-1",
+      "parent_id": "section-1-3",
+      "name": "重叠律(Involution): a'' = a",
+      "level": 3,
+      "node_type": "principle",
+      "description": "双重否定等于肯定",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#a7f3d0",
+      "tags": ["原理", "定理"],
+      "content": "重叠律：双重否定等于肯定",
+      "examples": ["(a')' = a"],
+      "related_questions": ["什么是重叠律？", "如何证明 a'' = a？"]
+    },
+    {
+      "id": "point-1-3-2",
+      "parent_id": "section-1-3",
+      "name": "吸收律(Absorption): a + ab = a",
+      "level": 3,
+      "node_type": "principle",
+      "description": "吸收律的两种形式",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#a7f3d0",
+      "tags": ["原理", "定理"],
+      "content": "吸收律：a + ab = a(1+b) = a",
+      "examples": ["a + ab = a"],
+      "related_questions": ["什么是吸收律？", "如何证明 a + ab = a？"]
+    },
+    {
+      "id": "point-1-3-3",
+      "parent_id": "section-1-3",
+      "name": "对偶规则(Duality)",
+      "level": 3,
+      "node_type": "principle",
+      "description": "+ 变·，·变+, 1 变 0, 0 变 1",
+      "order_index": 2,
+      "is_leaf": true,
+      "color": "#a7f3d0",
+      "tags": ["原理", "定理"],
+      "content": "对偶规则：+ 变·，·变+, 1 变 0, 0 变 1",
+      "examples": ["a + b 的对偶是 a·b"],
+      "related_questions": ["什么是对偶规则？", "如何应用对偶规则？"]
+    },
+    {
+      "id": "point-1-3-4",
+      "parent_id": "section-1-3",
+      "name": "摩根定理(DeMorgan): (a+b)' = a'b', (ab)' = a'+b'",
+      "level": 3,
+      "node_type": "principle",
+      "description": "反演规则，用于化简逻辑表达式",
+      "order_index": 3,
+      "is_leaf": true,
+      "color": "#a7f3d0",
+      "tags": ["原理", "摩根定理", "重点"],
+      "content": "摩根定理：与的非 = 非的或；或的非 = 非的与",
+      "examples": ["(A+B+C)' = A'B'C'", "(ABC)' = A'+B'+C'"],
+      "related_questions": ["摩根定理是什么？", "如何应用摩根定理化简表达式？", "摩根定理的证明？"]
+    },
+    {
+      "id": "chapter-2",
+      "parent_id": "root",
+      "name": "2. 逻辑函数化简",
+      "level": 1,
+      "node_type": "chapter",
+      "description": "逻辑函数的标准化和化简方法",
+      "order_index": 1,
+      "is_leaf": false,
+      "color": "#f59e0b",
+      "tags": ["化简", "核心"],
+      "related_questions": ["为什么要化简逻辑函数？", "有哪些化简方法？"],
+      "prerequisites": ["chapter-1"]
+    },
+    {
+      "id": "section-2-1",
+      "parent_id": "chapter-2",
+      "name": "标准形式",
+      "level": 2,
+      "node_type": "section",
+      "description": "最小项和最大项表示法，是逻辑函数的标准表示",
+      "order_index": 0,
+      "is_leaf": false,
+      "color": "#fcd34d",
+      "tags": ["概念", "标准形式"],
+      "related_questions": ["什么是最小项？", "SOP 和 POS 有什么区别？"]
+    },
+    {
+      "id": "point-2-1-1",
+      "parent_id": "section-2-1",
+      "name": "最小项(Minterm, m): Sum-of-Products(SOP)",
+      "level": 3,
+      "node_type": "principle",
+      "description": "积之和标准形式，所有最小项的逻辑或",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#fde68a",
+      "tags": ["原理", "SOP"],
+      "content": "最小项：包含所有变量的乘积项，每个变量以原变量或反变量形式出现一次",
+      "examples": ["F(A,B,C) = Σm(1,3,5,7) = A'B'C + A'BC + AB'C + ABC"],
+      "related_questions": ["如何写出最小项表达式？", "Σm(1,3,5) 是什么意思？"]
+    },
+    {
+      "id": "point-2-1-2",
+      "parent_id": "section-2-1",
+      "name": "最大项(Maxterm, M): Product-of-Sums(POS)",
+      "level": 3,
+      "node_type": "principle",
+      "description": "和之积标准形式，所有最大项的逻辑与",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#fde68a",
+      "tags": ["原理", "POS"],
+      "content": "最大项：包含所有变量的和项，每个变量以原变量或反变量形式出现一次",
+      "examples": ["F(A,B,C) = ΠM(0,2,4,6)"],
+      "related_questions": ["什么是最大项？", "如何写出最大项表达式？"]
+    },
+    {
+      "id": "point-2-1-3",
+      "parent_id": "section-2-1",
+      "name": "性质：Σmi = 1, mi·mj = 0, Mi = mi'",
+      "level": 3,
+      "node_type": "principle",
+      "description": "最小项的基本性质",
+      "order_index": 2,
+      "is_leaf": true,
+      "color": "#fde68a",
+      "tags": ["原理", "性质"],
+      "content": "最小项的三个重要性质",
+      "examples": ["Σmi = 1：所有最小项之和为 1", "mi·mj = 0：任意两个不同最小项的乘积为 0"],
+      "related_questions": ["最小项有哪些性质？"]
+    },
+    {
+      "id": "section-2-2",
+      "parent_id": "chapter-2",
+      "name": "卡诺图(K-Map)",
+      "level": 2,
+      "node_type": "section",
+      "description": "图形化化简方法，直观高效",
+      "order_index": 1,
+      "is_leaf": false,
+      "color": "#fcd34d",
+      "tags": ["概念", "卡诺图", "重点"],
+      "related_questions": ["卡诺图怎么用？", "圈组有什么规则？"]
+    },
+    {
+      "id": "point-2-2-1",
+      "parent_id": "section-2-2",
+      "name": "圈组规则：2^N矩形, 圈越大越好, 数量越少越好",
+      "level": 3,
+      "node_type": "principle",
+      "description": "卡诺图化简的核心规则",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#fde68a",
+      "tags": ["原理", "卡诺图"],
+      "content": "卡诺图圈组的三大原则：2^N 矩形、圈越大越好、数量越少越好",
+      "examples": ["4 个相邻的 1 可以圈成一个 2×2 的矩形"],
+      "related_questions": ["卡诺图圈组有什么规则？", "为什么圈越大越好？"]
+    },
+    {
+      "id": "point-2-2-2",
+      "parent_id": "section-2-2",
+      "name": "约束项(Don't care): 利用'X'简化电路",
+      "level": 3,
+      "node_type": "principle",
+      "description": "无关项的灵活使用可以进一步化简",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#fde68a",
+      "tags": ["原理", "约束项"],
+      "content": "约束项：输出为任意值的情况，可用于化简",
+      "examples": ["BCD 码输入中 1010-1111 不会出现，可作为约束项"],
+      "related_questions": ["什么是约束项？", "如何利用约束项化简？"]
+    },
+    {
+      "id": "section-2-3",
+      "parent_id": "chapter-2",
+      "name": "逻辑变换",
+      "level": 2,
+      "node_type": "section",
+      "description": "不同逻辑门之间的转换",
+      "order_index": 2,
+      "is_leaf": false,
+      "color": "#fcd34d",
+      "tags": ["概念", "逻辑变换"],
+      "related_questions": ["如何用 NAND 实现 AND？", "逻辑变换有什么用？"]
+    },
+    {
+      "id": "point-2-3-1",
+      "parent_id": "section-2-3",
+      "name": "与非-与非(NAND-NAND)",
+      "level": 3,
+      "node_type": "circuit",
+      "description": "仅用 NAND 门实现任意逻辑函数",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#fde68a",
+      "tags": ["电路", "NAND"],
+      "content": "NAND 是通用门，可实现任何逻辑函数",
+      "examples": ["NOT A = A NAND A", "A AND B = (A NAND B)'"],
+      "related_questions": ["如何用 NAND 实现 NOT？", "为什么 NAND 是通用门？"]
+    },
+    {
+      "id": "point-2-3-2",
+      "parent_id": "section-2-3",
+      "name": "或非-或非(NOR-NOR)",
+      "level": 3,
+      "node_type": "circuit",
+      "description": "仅用 NOR 门实现任意逻辑函数",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#fde68a",
+      "tags": ["电路", "NOR"],
+      "content": "NOR 也是通用门",
+      "examples": ["NOT A = A NOR A"],
+      "related_questions": ["NOR 和 NAND 有什么区别？"]
+    },
+    {
+      "id": "chapter-3",
+      "parent_id": "root",
+      "name": "3. 组合逻辑电路",
+      "level": 1,
+      "node_type": "chapter",
+      "description": "组合逻辑电路的分析、设计和常用器件",
+      "order_index": 2,
+      "is_leaf": false,
+      "color": "#ef4444",
+      "tags": ["组合逻辑"],
+      "related_questions": ["什么是组合逻辑电路？", "组合逻辑和时序逻辑有什么区别？"],
+      "prerequisites": ["chapter-2"]
+    },
+    {
+      "id": "section-3-1",
+      "parent_id": "chapter-3",
+      "name": "分析与设计",
+      "level": 2,
+      "node_type": "section",
+      "description": "组合逻辑电路的方法论",
+      "order_index": 0,
+      "is_leaf": false,
+      "color": "#fca5a5",
+      "tags": ["方法", "设计"],
+      "related_questions": ["如何分析组合逻辑电路？", "如何设计组合逻辑电路？"]
+    },
+    {
+      "id": "point-3-1-1",
+      "parent_id": "section-3-1",
+      "name": "分析：电路图 → 表达式 → 真值表 → 功能",
+      "level": 3,
+      "node_type": "principle",
+      "description": "从电路到功能的分析流程",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#fca5a5",
+      "tags": ["原理", "分析"],
+      "content": "组合逻辑电路分析的四个步骤",
+      "related_questions": ["组合逻辑电路的分析步骤是什么？"]
+    },
+    {
+      "id": "point-3-1-2",
+      "parent_id": "section-3-1",
+      "name": "设计：需求 → 真值表 → 表达式 → 化简 → 画图",
+      "level": 3,
+      "node_type": "principle",
+      "description": "从需求到电路的设计流程",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#fca5a5",
+      "tags": ["原理", "设计"],
+      "content": "组合逻辑电路设计的五个步骤",
+      "related_questions": ["组合逻辑电路的设计步骤是什么？"]
+    },
+    {
+      "id": "section-3-2",
+      "parent_id": "chapter-3",
+      "name": "常用集成电路(MSI)",
+      "level": 2,
+      "node_type": "section",
+      "description": "中规模集成电路的应用",
+      "order_index": 1,
+      "is_leaf": false,
+      "color": "#fca5a5",
+      "tags": ["MSI", "集成电路"],
+      "related_questions": ["有哪些常用的 MSI 芯片？", "74HC138 怎么用？"]
+    },
+    {
+      "id": "point-3-2-1",
+      "parent_id": "section-3-2",
+      "name": "译码器(Decoder): 74HC138",
+      "level": 3,
+      "node_type": "circuit",
+      "description": "利用最小项实现多输出函数",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#fca5a5",
+      "tags": ["电路", "译码器"],
+      "content": "3-8 译码器，3 个输入，8 个输出，对应 8 个最小项",
+      "examples": ["74HC138 的 A2A1A0 = 000 时，Y0 = 0，其他为 1"],
+      "related_questions": ["74HC138 的使能端怎么接？", "如何用译码器实现逻辑函数？"]
+    },
+    {
+      "id": "point-3-2-2",
+      "parent_id": "section-3-2",
+      "name": "数据选择器(MUX): 4选1, 8选1",
+      "level": 3,
+      "node_type": "circuit",
+      "description": "实现逻辑函数的通用器件",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#fca5a5",
+      "tags": ["电路", "MUX"],
+      "content": "数据选择器：多路输入，一路输出，通过地址选择",
+      "examples": ["4 选 1 MUX：2 个地址端，4 个数据输入，1 个输出"],
+      "related_questions": ["如何用 MUX 实现逻辑函数？", "MUX 的使能端有什么用？"]
+    },
+    {
+      "id": "point-3-2-3",
+      "parent_id": "section-3-2",
+      "name": "数值比较器：8位二进制比较",
+      "level": 3,
+      "node_type": "circuit",
+      "description": "比较 A>B, A<B, A=B",
+      "order_index": 2,
+      "is_leaf": true,
+      "color": "#fca5a5",
+      "tags": ["电路", "比较器"],
+      "content": "比较两个 8 位二进制数的大小",
+      "related_questions": ["比较器的输出有哪些？"]
+    },
+    {
+      "id": "point-3-2-4",
+      "parent_id": "section-3-2",
+      "name": "编码器(Encoder)",
+      "level": 3,
+      "node_type": "circuit",
+      "description": "将输入信号转换为二进制代码",
+      "order_index": 3,
+      "is_leaf": true,
+      "color": "#fca5a5",
+      "tags": ["电路", "编码器"],
+      "content": "编码器：多路输入，少数输出，将输入信号编码",
+      "related_questions": ["编码器和译码器有什么区别？"]
+    },
+    {
+      "id": "section-3-3",
+      "parent_id": "chapter-3",
+      "name": "竞争与冒险",
+      "level": 2,
+      "node_type": "section",
+      "description": "组合逻辑电路的时序问题",
+      "order_index": 2,
+      "is_leaf": false,
+      "color": "#fca5a5",
+      "tags": ["时序", "问题"],
+      "related_questions": ["什么是竞争冒险？", "如何消除竞争冒险？"]
+    },
+    {
+      "id": "point-3-3-1",
+      "parent_id": "section-3-3",
+      "name": "原因：信号传输延迟",
+      "level": 3,
+      "node_type": "principle",
+      "description": "不同路径延迟导致输出不稳定",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#fca5a5",
+      "tags": ["原理", "延迟"],
+      "content": "竞争冒险的原因：信号经过不同路径到达输出端的时间不同",
+      "related_questions": ["为什么会产生竞争冒险？"]
+    },
+    {
+      "id": "point-3-3-2",
+      "parent_id": "section-3-3",
+      "name": "现象：毛刺(Glitch)",
+      "level": 3,
+      "node_type": "concept",
+      "description": "输出端出现不应有的尖脉冲",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#fca5a5",
+      "tags": ["概念", "毛刺"],
+      "content": "毛刺：输出端出现的短暂尖脉冲，可能导致误触发",
+      "related_questions": ["毛刺是什么？", "毛刺有什么危害？"]
+    },
+    {
+      "id": "point-3-3-3",
+      "parent_id": "section-3-3",
+      "name": "消除：增加冗余项等",
+      "level": 3,
+      "node_type": "principle",
+      "description": "通过修改逻辑设计消除冒险",
+      "order_index": 2,
+      "is_leaf": true,
+      "color": "#fca5a5",
+      "tags": ["原理", "消除"],
+      "content": "消除方法：增加冗余项、引入选通脉冲、使用滤波电容",
+      "related_questions": ["如何消除竞争冒险？", "增加冗余项的原理是什么？"]
+    },
+    {
+      "id": "chapter-4",
+      "parent_id": "root",
+      "name": "4. 触发器(Flip-Flops)",
+      "level": 1,
+      "node_type": "chapter",
+      "description": "时序逻辑电路的基本存储元件",
+      "order_index": 3,
+      "is_leaf": false,
+      "color": "#8b5cf6",
+      "tags": ["触发器", "时序"],
+      "related_questions": ["触发器有什么用？", "触发器和锁存器有什么区别？"],
+      "prerequisites": ["chapter-3"]
+    },
+    {
+      "id": "section-4-1",
+      "parent_id": "chapter-4",
+      "name": "基本概念",
+      "level": 2,
+      "node_type": "section",
+      "description": "触发器的基础概念",
+      "order_index": 0,
+      "is_leaf": false,
+      "color": "#c4b5fd",
+      "tags": ["概念", "基础"],
+      "related_questions": ["触发器有哪些基本概念？"]
+    },
+    {
+      "id": "point-4-1-1",
+      "parent_id": "section-4-1",
+      "name": "锁存器(Latch) vs 触发器(FF)",
+      "level": 3,
+      "node_type": "concept",
+      "description": "电平敏感 vs 边沿敏感",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#ddd6fe",
+      "tags": ["概念", "锁存器"],
+      "content": "锁存器：电平敏感；触发器：边沿敏感",
+      "related_questions": ["锁存器和触发器有什么区别？"]
+    },
+    {
+      "id": "point-4-1-2",
+      "parent_id": "section-4-1",
+      "name": "触发方式：电平, 脉冲, 边沿",
+      "level": 3,
+      "node_type": "concept",
+      "description": "不同的触发机制",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#ddd6fe",
+      "tags": ["概念", "触发"],
+      "content": "电平触发：电平有效期间输入变化会影响输出；边沿触发：只在时钟边沿采样",
+      "related_questions": ["有哪些触发方式？", "边沿触发有什么好处？"]
+    },
+    {
+      "id": "point-4-1-3",
+      "parent_id": "section-4-1",
+      "name": "主从结构(Master-Slave): 解决空翻",
+      "level": 3,
+      "node_type": "circuit",
+      "description": "两级触发器结构",
+      "order_index": 2,
+      "is_leaf": true,
+      "color": "#ddd6fe",
+      "tags": ["电路", "主从"],
+      "content": "主从触发器：主触发器在时钟高电平采样，从触发器在时钟低电平输出",
+      "related_questions": ["什么是主从触发器？", "主从结构如何解决空翻？"]
+    },
+    {
+      "id": "section-4-2",
+      "parent_id": "chapter-4",
+      "name": "类型与方程",
+      "level": 2,
+      "node_type": "section",
+      "description": "各种触发器的特性方程",
+      "order_index": 1,
+      "is_leaf": false,
+      "color": "#c4b5fd",
+      "tags": ["类型", "方程"],
+      "related_questions": ["有哪些类型的触发器？", "触发器的特性方程是什么？"]
+    },
+    {
+      "id": "point-4-2-1",
+      "parent_id": "section-4-2",
+      "name": "SR触发器：S·R=0(约束)",
+      "level": 3,
+      "node_type": "circuit",
+      "description": "置位复位触发器，有约束条件",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#ddd6fe",
+      "tags": ["电路", "SR"],
+      "content": "SR 触发器：S=1 置位，R=1 复位，S=R=1 禁止",
+      "examples": ["S=1, R=0 → Q=1", "S=0, R=1 → Q=0"],
+      "related_questions": ["SR 触发器为什么有约束？", "SR 触发器的特性方程是什么？"]
+    },
+    {
+      "id": "point-4-2-2",
+      "parent_id": "section-4-2",
+      "name": "D触发器：Qn+1 = D",
+      "level": 3,
+      "node_type": "circuit",
+      "description": "数据触发器，最常用的触发器",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#ddd6fe",
+      "tags": ["电路", "D触发器"],
+      "content": "D 触发器：Q(n+1) = D，无约束条件",
+      "related_questions": ["D 触发器有什么用？", "D 触发器的特性方程是什么？"]
+    },
+    {
+      "id": "point-4-2-3",
+      "parent_id": "section-4-2",
+      "name": "JK触发器：Qn+1 = JQn' + K'Qn",
+      "level": 3,
+      "node_type": "circuit",
+      "description": "多功能触发器，无约束",
+      "order_index": 2,
+      "is_leaf": true,
+      "color": "#ddd6fe",
+      "tags": ["电路", "JK"],
+      "content": "JK 触发器：J=K=1 时翻转，无约束条件",
+      "examples": ["J=0, K=0 → 保持", "J=1, K=1 → 翻转"],
+      "related_questions": ["JK 触发器的特性方程是什么？", "JK 触发器有什么优点？"]
+    },
+    {
+      "id": "point-4-2-4",
+      "parent_id": "section-4-2",
+      "name": "T触发器：Qn+1 = T ⊕ Qn",
+      "level": 3,
+      "node_type": "circuit",
+      "description": "翻转触发器，用于计数器",
+      "order_index": 3,
+      "is_leaf": true,
+      "color": "#ddd6fe",
+      "tags": ["电路", "T触发器"],
+      "content": "T 触发器：T=1 时翻转，T=0 时保持",
+      "related_questions": ["T 触发器有什么用？", "T 触发器的特性方程是什么？"]
+    },
+    {
+      "id": "section-4-3",
+      "parent_id": "chapter-4",
+      "name": "功能转换",
+      "level": 2,
+      "node_type": "section",
+      "description": "不同类型触发器的转换",
+      "order_index": 2,
+      "is_leaf": false,
+      "color": "#c4b5fd",
+      "tags": ["转换", "应用"],
+      "related_questions": ["如何转换触发器类型？"]
+    },
+    {
+      "id": "point-4-3-1",
+      "parent_id": "section-4-3",
+      "name": "利用组合逻辑转换触发器类型",
+      "level": 3,
+      "node_type": "application",
+      "description": "通过外加逻辑门实现类型转换",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#ddd6fe",
+      "tags": ["应用", "转换"],
+      "content": "例如：D 触发器 → T 触发器，D = T ⊕ Q",
+      "related_questions": ["如何将 D 触发器转换为 T 触发器？"]
+    },
+    {
+      "id": "chapter-5",
+      "parent_id": "root",
+      "name": "5. 时序逻辑电路",
+      "level": 1,
+      "node_type": "chapter",
+      "description": "具有记忆功能的逻辑电路",
+      "order_index": 4,
+      "is_leaf": false,
+      "color": "#ec4899",
+      "tags": ["时序"],
+      "related_questions": ["什么是时序逻辑电路？", "时序逻辑和组合逻辑有什么区别？"],
+      "prerequisites": ["chapter-4"]
+    },
+    {
+      "id": "section-5-1",
+      "parent_id": "chapter-5",
+      "name": "模型",
+      "level": 2,
+      "node_type": "section",
+      "description": "时序电路的两种模型",
+      "order_index": 0,
+      "is_leaf": false,
+      "color": "#f9a8d4",
+      "tags": ["模型", "理论"],
+      "related_questions": ["时序电路有哪些模型？"]
+    },
+    {
+      "id": "point-5-1-1",
+      "parent_id": "section-5-1",
+      "name": "Mealy型：输出与输入、状态有关",
+      "level": 3,
+      "node_type": "principle",
+      "description": "输出取决于当前状态和输入",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#fbcfe8",
+      "tags": ["原理", "Mealy"],
+      "content": "Mealy 型：输出 = f(当前状态，输入)",
+      "related_questions": ["Mealy 型和 Moore 型有什么区别？"]
+    },
+    {
+      "id": "point-5-1-2",
+      "parent_id": "section-5-1",
+      "name": "Moore型：输出仅与状态有关",
+      "level": 3,
+      "node_type": "principle",
+      "description": "输出只取决于当前状态",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#fbcfe8",
+      "tags": ["原理", "Moore"],
+      "content": "Moore 型：输出 = f(当前状态)",
+      "related_questions": ["Moore 型有什么好处？"]
+    },
+    {
+      "id": "section-5-2",
+      "parent_id": "chapter-5",
+      "name": "三大方程",
+      "level": 2,
+      "node_type": "section",
+      "description": "时序电路的数学描述",
+      "order_index": 1,
+      "is_leaf": false,
+      "color": "#f9a8d4",
+      "tags": ["方程", "数学"],
+      "related_questions": ["时序电路有哪些方程？"]
+    },
+    {
+      "id": "point-5-2-1",
+      "parent_id": "section-5-2",
+      "name": "输出方程(Output Eq)",
+      "level": 3,
+      "node_type": "principle",
+      "description": "描述输出与状态/输入的关系",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#fbcfe8",
+      "tags": ["原理", "方程"],
+      "content": "输出方程：Z = f(X, Q)",
+      "related_questions": ["如何写出输出方程？"]
+    },
+    {
+      "id": "point-5-2-2",
+      "parent_id": "section-5-2",
+      "name": "驱动/激励方程(Input/Excitation Eq)",
+      "level": 3,
+      "node_type": "principle",
+      "description": "描述触发器输入与外部输入的关系",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#fbcfe8",
+      "tags": ["原理", "方程"],
+      "content": "激励方程：触发器的输入如何由外部输入和当前状态决定",
+      "related_questions": ["如何写出激励方程？"]
+    },
+    {
+      "id": "point-5-2-3",
+      "parent_id": "section-5-2",
+      "name": "状态方程(State Eq)",
+      "level": 3,
+      "node_type": "principle",
+      "description": "描述次态与现态/输入的关系",
+      "order_index": 2,
+      "is_leaf": true,
+      "color": "#fbcfe8",
+      "tags": ["原理", "方程"],
+      "content": "状态方程：Q(n+1) = f(X, Q(n))",
+      "related_questions": ["如何写出状态方程？"]
+    },
+    {
+      "id": "section-5-3",
+      "parent_id": "chapter-5",
+      "name": "设计实例",
+      "level": 2,
+      "node_type": "section",
+      "description": "序列检测器的设计",
+      "order_index": 2,
+      "is_leaf": false,
+      "color": "#f9a8d4",
+      "tags": ["实例", "设计"],
+      "related_questions": ["如何设计时序电路？"]
+    },
+    {
+      "id": "point-5-3-1",
+      "parent_id": "section-5-3",
+      "name": "序列检测器：检测连续3个'1'",
+      "level": 3,
+      "node_type": "application",
+      "description": "经典的时序电路设计案例",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#fbcfe8",
+      "tags": ["应用", "实例"],
+      "content": "检测输入序列中是否出现连续的 3 个'1'",
+      "related_questions": ["如何设计序列检测器？"]
+    },
+    {
+      "id": "point-5-3-2",
+      "parent_id": "section-5-3",
+      "name": "步骤：逻辑抽象→状态图→状态化简→状态分配→选触发器",
+      "level": 3,
+      "node_type": "principle",
+      "description": "时序电路设计的一般步骤",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#fbcfe8",
+      "tags": ["原理", "步骤"],
+      "content": "时序电路设计的五个步骤",
+      "related_questions": ["时序电路的设计步骤是什么？"]
+    },
+    {
+      "id": "chapter-6",
+      "parent_id": "root",
+      "name": "6. 计数器(Counters)",
+      "level": 1,
+      "node_type": "chapter",
+      "description": "时序逻辑电路的重要应用",
+      "order_index": 5,
+      "is_leaf": false,
+      "color": "#06b6d4",
+      "tags": ["计数器"],
+      "related_questions": ["计数器有什么用？"],
+      "prerequisites": ["chapter-5"]
+    },
+    {
+      "id": "section-6-1",
+      "parent_id": "chapter-6",
+      "name": "分类：同步 vs 异步",
+      "level": 2,
+      "node_type": "section",
+      "description": "计数器的基本分类",
+      "order_index": 0,
+      "is_leaf": false,
+      "color": "#67e8f9",
+      "tags": ["分类"],
+      "related_questions": ["计数器有哪些分类？"]
+    },
+    {
+      "id": "point-6-1-1",
+      "parent_id": "section-6-1",
+      "name": "74LS290: 二-五-十进制异步计数器",
+      "level": 3,
+      "node_type": "circuit",
+      "description": "经典 MSI 计数器芯片",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#a5f3fc",
+      "tags": ["电路", "MSI"],
+      "content": "74LS290：可实现二进制、五进制、十进制计数",
+      "related_questions": ["74LS290 怎么用？"]
+    },
+    {
+      "id": "section-6-2",
+      "parent_id": "chapter-6",
+      "name": "任意进制设计(Base-M)",
+      "level": 2,
+      "node_type": "section",
+      "description": "非标准进制计数器的设计",
+      "order_index": 1,
+      "is_leaf": false,
+      "color": "#67e8f9",
+      "tags": ["设计", "应用"],
+      "related_questions": ["如何设计任意进制计数器？"]
+    },
+    {
+      "id": "point-6-2-1",
+      "parent_id": "section-6-2",
+      "name": "M < N",
+      "level": 3,
+      "node_type": "principle",
+      "description": "小于原进制的任意进制设计",
+      "order_index": 0,
+      "is_leaf": false,
+      "color": "#a5f3fc",
+      "tags": ["原理", "方法"],
+      "related_questions": ["如何设计 M < N 的计数器？"]
+    },
+    {
+      "id": "point-6-2-1-1",
+      "parent_id": "point-6-2-1",
+      "name": "置零法 (Reset): 异步清零 vs 同步清零",
+      "level": 4,
+      "node_type": "principle",
+      "description": "通过清零实现任意进制",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#a5f3fc",
+      "tags": ["原理", "清零"],
+      "content": "置零法：计数到 M 时清零",
+      "related_questions": ["什么是置零法？", "异步清零和同步清零有什么区别？"]
+    },
+    {
+      "id": "point-6-2-1-2",
+      "parent_id": "point-6-2-1",
+      "name": "置数法 (Preset)",
+      "level": 4,
+      "node_type": "principle",
+      "description": "通过置数实现任意进制",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#a5f3fc",
+      "tags": ["原理", "置数"],
+      "content": "置数法：计数到 M 时置数",
+      "related_questions": ["什么是置数法？", "置数法和置零法有什么区别？"]
+    },
+    {
+      "id": "point-6-2-2",
+      "parent_id": "section-6-2",
+      "name": "M > N (级联)",
+      "level": 3,
+      "node_type": "principle",
+      "description": "大于原进制的任意进制设计",
+      "order_index": 1,
+      "is_leaf": false,
+      "color": "#a5f3fc",
+      "tags": ["原理", "级联"],
+      "related_questions": ["如何设计 M > N 的计数器？"]
+    },
+    {
+      "id": "point-6-2-2-1",
+      "parent_id": "point-6-2-2",
+      "name": "串行进位 vs 并行进位",
+      "level": 4,
+      "node_type": "principle",
+      "description": "级联计数器的进位方式",
+      "order_index": 0,
+      "is_leaf": true,
+      "color": "#a5f3fc",
+      "tags": ["原理", "进位"],
+      "content": "串行进位：前级输出作为后级时钟；并行进位：所有级同时工作",
+      "related_questions": ["串行进位和并行进位有什么区别？"]
+    },
+    {
+      "id": "point-6-2-2-2",
+      "parent_id": "point-6-2-2",
+      "name": "整体置零 vs 整体置数",
+      "level": 4,
+      "node_type": "principle",
+      "description": "级联计数器的控制方法",
+      "order_index": 1,
+      "is_leaf": true,
+      "color": "#a5f3fc",
+      "tags": ["原理", "控制"],
+      "content": "级联计数器的整体控制方法",
+      "related_questions": ["级联计数器如何整体控制？"]
+    }
+  ],
+  "relationships": [
+    {
+      "source_id": "root",
+      "target_id": "chapter-1",
+      "relation_type": "contains",
+      "description": "第一章：基础知识"
+    },
+    {
+      "source_id": "root",
+      "target_id": "chapter-2",
+      "relation_type": "contains",
+      "description": "第二章：逻辑函数化简"
+    },
+    {
+      "source_id": "root",
+      "target_id": "chapter-3",
+      "relation_type": "contains",
+      "description": "第三章：组合逻辑电路"
+    },
+    {
+      "source_id": "root",
+      "target_id": "chapter-4",
+      "relation_type": "contains",
+      "description": "第四章：触发器"
+    },
+    {
+      "source_id": "root",
+      "target_id": "chapter-5",
+      "relation_type": "contains",
+      "description": "第五章：时序逻辑电路"
+    },
+    {
+      "source_id": "root",
+      "target_id": "chapter-6",
+      "relation_type": "contains",
+      "description": "第六章：计数器"
+    },
+    {
+      "source_id": "chapter-1",
+      "target_id": "section-1-1",
+      "relation_type": "contains",
+      "description": "包含小节：数制与编码"
+    },
+    {
+      "source_id": "chapter-1",
+      "target_id": "section-1-2",
+      "relation_type": "contains",
+      "description": "包含小节：逻辑门电路"
+    },
+    {
+      "source_id": "chapter-1",
+      "target_id": "section-1-3",
+      "relation_type": "contains",
+      "description": "包含小节：布尔代数定理"
+    },
+    {
+      "source_id": "chapter-2",
+      "target_id": "section-2-1",
+      "relation_type": "contains",
+      "description": "包含小节：标准形式"
+    },
+    {
+      "source_id": "chapter-2",
+      "target_id": "section-2-2",
+      "relation_type": "contains",
+      "description": "包含小节：卡诺图"
+    },
+    {
+      "source_id": "chapter-2",
+      "target_id": "section-2-3",
+      "relation_type": "contains",
+      "description": "包含小节：逻辑变换"
+    },
+    {
+      "source_id": "chapter-3",
+      "target_id": "section-3-1",
+      "relation_type": "contains",
+      "description": "包含小节：分析与设计"
+    },
+    {
+      "source_id": "chapter-3",
+      "target_id": "section-3-2",
+      "relation_type": "contains",
+      "description": "包含小节：常用集成电路"
+    },
+    {
+      "source_id": "chapter-3",
+      "target_id": "section-3-3",
+      "relation_type": "contains",
+      "description": "包含小节：竞争与冒险"
+    },
+    {
+      "source_id": "chapter-4",
+      "target_id": "section-4-1",
+      "relation_type": "contains",
+      "description": "包含小节：基本概念"
+    },
+    {
+      "source_id": "chapter-4",
+      "target_id": "section-4-2",
+      "relation_type": "contains",
+      "description": "包含小节：类型与方程"
+    },
+    {
+      "source_id": "chapter-4",
+      "target_id": "section-4-3",
+      "relation_type": "contains",
+      "description": "包含小节：功能转换"
+    },
+    {
+      "source_id": "chapter-5",
+      "target_id": "section-5-1",
+      "relation_type": "contains",
+      "description": "包含小节：模型"
+    },
+    {
+      "source_id": "chapter-5",
+      "target_id": "section-5-2",
+      "relation_type": "contains",
+      "description": "包含小节：三大方程"
+    },
+    {
+      "source_id": "chapter-5",
+      "target_id": "section-5-3",
+      "relation_type": "contains",
+      "description": "包含小节：设计实例"
+    },
+    {
+      "source_id": "chapter-6",
+      "target_id": "section-6-1",
+      "relation_type": "contains",
+      "description": "包含小节：分类"
+    },
+    {
+      "source_id": "chapter-6",
+      "target_id": "section-6-2",
+      "relation_type": "contains",
+      "description": "包含小节：任意进制设计"
+    },
+    {
+      "source_id": "section-1-1",
+      "target_id": "point-1-1-1",
+      "relation_type": "contains",
+      "description": "包含知识点：进制转换"
+    },
+    {
+      "source_id": "section-1-1",
+      "target_id": "point-1-1-2",
+      "relation_type": "contains",
+      "description": "包含知识点：编码"
+    },
+    {
+      "source_id": "section-1-2",
+      "target_id": "point-1-2-1",
+      "relation_type": "contains",
+      "description": "包含知识点：符号"
+    },
+    {
+      "source_id": "section-1-2",
+      "target_id": "point-1-2-2",
+      "relation_type": "contains",
+      "description": "包含知识点：逻辑门类型"
+    },
+    {
+      "source_id": "section-1-3",
+      "target_id": "point-1-3-1",
+      "relation_type": "contains",
+      "description": "包含知识点：重叠律"
+    },
+    {
+      "source_id": "section-1-3",
+      "target_id": "point-1-3-2",
+      "relation_type": "contains",
+      "description": "包含知识点：吸收律"
+    },
+    {
+      "source_id": "section-1-3",
+      "target_id": "point-1-3-3",
+      "relation_type": "contains",
+      "description": "包含知识点：对偶规则"
+    },
+    {
+      "source_id": "section-1-3",
+      "target_id": "point-1-3-4",
+      "relation_type": "contains",
+      "description": "包含知识点：摩根定理"
+    },
+    {
+      "source_id": "section-2-1",
+      "target_id": "point-2-1-1",
+      "relation_type": "contains",
+      "description": "包含知识点：最小项"
+    },
+    {
+      "source_id": "section-2-1",
+      "target_id": "point-2-1-2",
+      "relation_type": "contains",
+      "description": "包含知识点：最大项"
+    },
+    {
+      "source_id": "section-2-1",
+      "target_id": "point-2-1-3",
+      "relation_type": "contains",
+      "description": "包含知识点：最小项性质"
+    },
+    {
+      "source_id": "section-2-2",
+      "target_id": "point-2-2-1",
+      "relation_type": "contains",
+      "description": "包含知识点：圈组规则"
+    },
+    {
+      "source_id": "section-2-2",
+      "target_id": "point-2-2-2",
+      "relation_type": "contains",
+      "description": "包含知识点：约束项"
+    },
+    {
+      "source_id": "section-2-3",
+      "target_id": "point-2-3-1",
+      "relation_type": "contains",
+      "description": "包含知识点：NAND-NAND"
+    },
+    {
+      "source_id": "section-2-3",
+      "target_id": "point-2-3-2",
+      "relation_type": "contains",
+      "description": "包含知识点：NOR-NOR"
+    },
+    {
+      "source_id": "section-3-1",
+      "target_id": "point-3-1-1",
+      "relation_type": "contains",
+      "description": "包含知识点：分析流程"
+    },
+    {
+      "source_id": "section-3-1",
+      "target_id": "point-3-1-2",
+      "relation_type": "contains",
+      "description": "包含知识点：设计流程"
+    },
+    {
+      "source_id": "section-3-2",
+      "target_id": "point-3-2-1",
+      "relation_type": "contains",
+      "description": "包含知识点：译码器"
+    },
+    {
+      "source_id": "section-3-2",
+      "target_id": "point-3-2-2",
+      "relation_type": "contains",
+      "description": "包含知识点：MUX"
+    },
+    {
+      "source_id": "section-3-2",
+      "target_id": "point-3-2-3",
+      "relation_type": "contains",
+      "description": "包含知识点：比较器"
+    },
+    {
+      "source_id": "section-3-2",
+      "target_id": "point-3-2-4",
+      "relation_type": "contains",
+      "description": "包含知识点：编码器"
+    },
+    {
+      "source_id": "section-3-3",
+      "target_id": "point-3-3-1",
+      "relation_type": "contains",
+      "description": "包含知识点：竞争原因"
+    },
+    {
+      "source_id": "section-3-3",
+      "target_id": "point-3-3-2",
+      "relation_type": "contains",
+      "description": "包含知识点：冒险现象"
+    },
+    {
+      "source_id": "section-3-3",
+      "target_id": "point-3-3-3",
+      "relation_type": "contains",
+      "description": "包含知识点：消除方法"
+    },
+    {
+      "source_id": "section-4-1",
+      "target_id": "point-4-1-1",
+      "relation_type": "contains",
+      "description": "包含知识点：锁存器vs触发器"
+    },
+    {
+      "source_id": "section-4-1",
+      "target_id": "point-4-1-2",
+      "relation_type": "contains",
+      "description": "包含知识点：触发方式"
+    },
+    {
+      "source_id": "section-4-1",
+      "target_id": "point-4-1-3",
+      "relation_type": "contains",
+      "description": "包含知识点：主从结构"
+    },
+    {
+      "source_id": "section-4-2",
+      "target_id": "point-4-2-1",
+      "relation_type": "contains",
+      "description": "包含知识点：SR触发器"
+    },
+    {
+      "source_id": "section-4-2",
+      "target_id": "point-4-2-2",
+      "relation_type": "contains",
+      "description": "包含知识点：D触发器"
+    },
+    {
+      "source_id": "section-4-2",
+      "target_id": "point-4-2-3",
+      "relation_type": "contains",
+      "description": "包含知识点：JK触发器"
+    },
+    {
+      "source_id": "section-4-2",
+      "target_id": "point-4-2-4",
+      "relation_type": "contains",
+      "description": "包含知识点：T触发器"
+    },
+    {
+      "source_id": "section-4-3",
+      "target_id": "point-4-3-1",
+      "relation_type": "contains",
+      "description": "包含知识点：功能转换"
+    },
+    {
+      "source_id": "section-5-1",
+      "target_id": "point-5-1-1",
+      "relation_type": "contains",
+      "description": "包含知识点：Mealy型"
+    },
+    {
+      "source_id": "section-5-1",
+      "target_id": "point-5-1-2",
+      "relation_type": "contains",
+      "description": "包含知识点：Moore型"
+    },
+    {
+      "source_id": "section-5-2",
+      "target_id": "point-5-2-1",
+      "relation_type": "contains",
+      "description": "包含知识点：输出方程"
+    },
+    {
+      "source_id": "section-5-2",
+      "target_id": "point-5-2-2",
+      "relation_type": "contains",
+      "description": "包含知识点：激励方程"
+    },
+    {
+      "source_id": "section-5-2",
+      "target_id": "point-5-2-3",
+      "relation_type": "contains",
+      "description": "包含知识点：状态方程"
+    },
+    {
+      "source_id": "section-5-3",
+      "target_id": "point-5-3-1",
+      "relation_type": "contains",
+      "description": "包含知识点：序列检测器"
+    },
+    {
+      "source_id": "section-5-3",
+      "target_id": "point-5-3-2",
+      "relation_type": "contains",
+      "description": "包含知识点：设计步骤"
+    },
+    {
+      "source_id": "section-6-1",
+      "target_id": "point-6-1-1",
+      "relation_type": "contains",
+      "description": "包含知识点：74LS290"
+    },
+    {
+      "source_id": "section-6-2",
+      "target_id": "point-6-2-1",
+      "relation_type": "contains",
+      "description": "包含知识点：M < N 设计"
+    },
+    {
+      "source_id": "point-6-2-1",
+      "target_id": "point-6-2-1-1",
+      "relation_type": "contains",
+      "description": "包含知识点：置零法"
+    },
+    {
+      "source_id": "point-6-2-1",
+      "target_id": "point-6-2-1-2",
+      "relation_type": "contains",
+      "description": "包含知识点：置数法"
+    },
+    {
+      "source_id": "section-6-2",
+      "target_id": "point-6-2-2",
+      "relation_type": "contains",
+      "description": "包含知识点：M > N 级联"
+    },
+    {
+      "source_id": "point-6-2-2",
+      "target_id": "point-6-2-2-1",
+      "relation_type": "contains",
+      "description": "包含知识点：进位方式"
+    },
+    {
+      "source_id": "point-6-2-2",
+      "target_id": "point-6-2-2-2",
+      "relation_type": "contains",
+      "description": "包含知识点：整体控制"
+    },
+    {
+      "source_id": "chapter-1",
+      "target_id": "chapter-2",
+      "relation_type": "prerequisite",
+      "description": "基础知识是逻辑函数化简的先修知识"
+    },
+    {
+      "source_id": "chapter-2",
+      "target_id": "chapter-3",
+      "relation_type": "prerequisite",
+      "description": "逻辑函数化简是组合逻辑电路的先修知识"
+    },
+    {
+      "source_id": "chapter-3",
+      "target_id": "chapter-4",
+      "relation_type": "prerequisite",
+      "description": "组合逻辑电路是触发器的先修知识"
+    },
+    {
+      "source_id": "chapter-4",
+      "target_id": "chapter-5",
+      "relation_type": "prerequisite",
+      "description": "触发器是时序逻辑电路的先修知识"
+    },
+    {
+      "source_id": "chapter-5",
+      "target_id": "chapter-6",
+      "relation_type": "prerequisite",
+      "description": "时序逻辑电路是计数器的先修知识"
+    },
+    {
+      "source_id": "point-1-3-4",
+      "target_id": "section-2-3",
+      "relation_type": "derives",
+      "description": "摩根定理衍生出逻辑变换技术"
+    },
+    {
+      "source_id": "point-2-2-1",
+      "target_id": "section-3-1",
+      "relation_type": "derives",
+      "description": "卡诺图化简应用于组合逻辑设计"
+    },
+    {
+      "source_id": "section-2-3",
+      "target_id": "point-3-2-1",
+      "relation_type": "derives",
+      "description": "逻辑变换应用于译码器设计"
+    },
+    {
+      "source_id": "point-4-2-4",
+      "target_id": "section-6-2",
+      "relation_type": "derives",
+      "description": "T触发器衍生出计数器设计"
+    }
+  ]
+}
