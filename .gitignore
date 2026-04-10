@@ -1,9 +1,34 @@
+# Python
 /backend/.venv/
+/backend/__pycache__/
+/backend/**/*.pyc
+/backend/.pytest_cache/
+
+# Node.js
 /my-rag-frontend/node_modules
-.idea
+/my-rag-frontend/dist/
+
+# 数据库和存储
 /backend/storage/
-/backend/app/data/
+/backend/app/data/uploads/
+
+# 日志
 /backend/logs/
+
+# 环境变量和配置
 /backend/.env
-/.idea
-/backend/
+/backend/.env.local
+
+# IDE
+/backend/.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.log
