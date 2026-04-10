@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FC } from 'react'
+import {type FC, useCallback, useEffect, useMemo, useRef, useState} from 'react'
 
-import { getUserProgress, toggleNodeProgress } from '@/api/mindMap'
-import { useMindMapTree, useNodePath } from '@/hooks/useMindMap'
-import { Skeleton } from '@/components/common/Skeleton'
-import { ChatPanel } from './ChatPanel'
-import { MindMapNodeItem } from './MindMapNodeItem'
-import { EdgeLayer, FocusCard, PathBreadcrumb, TooltipCard, ZoomControls } from './MindMapOverlays'
-import { buildEdges, findNode, flattenNodes, getBounds, layoutTree, type Node, type TooltipState } from './mindMapLayout'
-import { useMindMapViewport } from './useMindMapViewport'
-import { useTheme } from '@/hooks/useTheme'
+import {getUserProgress, toggleNodeProgress} from '@/api/mindMap'
+import {useMindMapTree, useNodePath} from '@/hooks/useMindMap'
+import {Skeleton} from '@/components/common/Skeleton'
+import {ChatPanel} from './ChatPanel'
+import {MindMapNodeItem} from './MindMapNodeItem'
+import {EdgeLayer, FocusCard, PathBreadcrumb, TooltipCard, ZoomControls} from './MindMapOverlays'
+import {buildEdges, findNode, flattenNodes, getBounds, layoutTree, type Node, type TooltipState} from './mindMapLayout'
+import {useMindMapViewport} from './useMindMapViewport'
+import {useTheme} from '@/hooks/useTheme'
 
 const ROOT_ID = 'root'
 const EMPTY = '单击标题更新详情，双击节点展开或收缩分支。'
@@ -114,6 +114,9 @@ export const MindMapPage: FC = () => {
   const subtitle = selected?.node_type || '知识节点'
   const pathText = path.length ? path.map((item) => item.title).join(' / ') : EMPTY
   const progressPercent = progressStats.total > 0 ? Math.round((progressStats.completed / progressStats.total) * 100) : 0
+
+  // 调试信息
+  console.log('MindMapPage 渲染:', { selected, selectedId, path, pathText })
 
   const handleSelect = useCallback((id: string) => {
     setSelectedId(id)
@@ -331,11 +334,11 @@ export const MindMapPage: FC = () => {
             </div>
 
             {selected && <FocusCard title={title} subtitle={subtitle} onOpenChat={() => setIsChatCollapsed(false)} />}
-            {selected && <PathBreadcrumb pathText={pathText} />}
             {tooltip && <TooltipCard tooltip={tooltip} />}
           </div>
         </section>
         <ZoomControls scale={view.scale} onZoomOut={() => zoomByButton(-0.15)} onZoomIn={() => zoomByButton(0.15)} onReset={resetView} />
+        {selected && <PathBreadcrumb pathText={pathText} />}
       </div>
 
       {selected && <ChatPanel node={selected!} isCollapsed={isChatCollapsed} onToggleCollapse={() => setIsChatCollapsed((prev) => !prev)} />}

@@ -1,8 +1,8 @@
-import { type FC } from 'react'
-import { Maximize2, MessageSquareMore, ZoomIn, ZoomOut } from 'lucide-react'
-import type { MindMapNode } from '@/api/mindMap'
-import type { Edge } from './mindMapLayout'
-import { useTheme } from '@/hooks/useTheme'
+import {type FC} from 'react'
+import {Maximize2, MessageSquareMore, ZoomIn, ZoomOut} from 'lucide-react'
+import type {MindMapNode} from '@/api/mindMap'
+import type {Edge} from './mindMapLayout'
+import {useTheme} from '@/hooks/useTheme'
 
 type FocusCardProps = {
   title: string
@@ -80,10 +80,11 @@ export const ZoomControls: FC<ZoomControlsProps> = ({ scale, onZoomOut, onZoomIn
 
 export const PathBreadcrumb: FC<PathBreadcrumbProps> = ({ pathText }) => {
   const { isDark } = useTheme()
+  console.log('PathBreadcrumb 渲染:', { pathText })
   return (
-    <div className={`pointer-events-none absolute bottom-20 left-4 z-10 max-w-140 rounded-3xl border px-4 py-3 shadow-xl backdrop-blur-md ${isDark ? 'border-slate-800/80 bg-slate-950/80' : 'border-blue-200/60 bg-white/80'}`}>
-      <p className={`text-[11px] uppercase tracking-[.26em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>当前路径</p>
-      <p className={`mt-2 text-sm leading-6 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>{pathText}</p>
+    <div className={`fixed left-4 bottom-5 z-100 max-w-100 rounded-3xl border px-4 py-3 shadow-xl backdrop-blur-md ${isDark ? 'border-slate-700 bg-slate-900/90' : 'border-sky-300 bg-white/95'}`}>
+      <p className={`text-[11px] uppercase tracking-[.26em] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>当前路径</p>
+      <p className={`mt-1 text-sm leading-6 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{pathText}</p>
     </div>
   )
 }
