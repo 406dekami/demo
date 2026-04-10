@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Request
 import time
 import logging
 from ..db import User, DB
-from ..schemas.auth import RegisterRequest,AuthResponse,LoginRequest,UserInfoResponse
+from ..schemas.auth import RegisterRequest,AuthResponse,LoginRequest,UserInfoResponse,UpdateProfileRequest
 from ..utils.token import generate_token, verify_token, invalidate_token
 
 # 获取模块 logger
@@ -135,3 +135,58 @@ async def logout(request: Request):
         logger.warning(f"⚠️ Token 无效或已过期：token={token[:20]}...")
     
     return {"message": "登出成功"}
+
+
+@router.put("/profile", response_model=UserInfoResponse, summary="更新个人资料")
+async def update_profile(req: UpdateProfileRequest, request: Request):
+    """更新当前登录用户的个人资料（昵称、签名、头像）"""
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if not token:
+        logger.warning("⚠️ 更新资料失败 - 未提供 token")
+        raise HTTPException(status_code=401, detail="未登录")
+
+    logger.info(f"📝 收到更新资料请求：token={token[:20]}...")
+    
+    user_id = verify_token(token)
+    if not user_id:
+        logger.warning(f"⚠️ Token 验证失败：token={token[:20]}...")
+        raise HTTPException(status_code=401, detail="登录已过期")
+
+    user = User.get_by_id(int(user_id))
+    if not user or user.is_deleted:
+        logger.warning(f"⚠️ 用户不存在：user_id={user_id}")
+        raise HTTPException(status_code=404, detail="用户不存在")
+
+    try:
+        # 更新字段（只更新提供的字段）
+        updated_fields = []
+        if req.nickname is not None:
+            user.nickname = req.nickname
+            updated_fields.append("nickname")
+        
+        if req.bio is not None:
+            # bio 存储在 email 字段中（临时方案，后续可添加 bio 字段到数据库）
+            user.email = req.bio
+            updated_fields.append("bio")
+        
+        if req.avatar is not None:
+            user.avatar = req.avatar
+            updated_fields.append("avatar")
+        
+        if updated_fields:
+            user.save()
+            logger.info(f"✅ 用户资料更新成功：user_id={user_id}, fields={updated_fields}")
+        else:
+            logger.info(f"ℹ️ 无字段需要更新：user_id={user_id}")
+
+        return UserInfoResponse(
+            user_id=str(user.id),
+            phone=user.phone,
+            nickname=user.nickname,
+            avatar=user.avatar,
+            email=user.email,
+            status=user.status
+        )
+    except Exception as e:
+        logger.error(f"❌ 更新用户资料失败：user_id={user_id}, error={str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"更新失败：{str(e)}")

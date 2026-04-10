@@ -1,7 +1,7 @@
-import { type FC, useState, useEffect, useRef } from 'react'
-import { Camera, Save, Upload } from 'lucide-react'
-import { useTheme } from '@/hooks/useTheme'
-import { getUserInfo, updateProfile, uploadAvatar, type UserInfo } from '@/api/auth'
+import {type FC, useEffect, useRef, useState} from 'react'
+import {Camera, Save} from 'lucide-react'
+import {useTheme} from '@/hooks/useTheme'
+import {getUserInfo, updateProfile, uploadAvatar, type UserInfo} from '@/api/auth'
 import toast from 'react-hot-toast'
 
 export const ProfileSettings: FC = () => {
@@ -13,11 +13,6 @@ export const ProfileSettings: FC = () => {
   const [nickname, setNickname] = useState('')
   const [bio, setBio] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // 加载用户信息
-  useEffect(() => {
-    loadUserInfo()
-  }, [])
 
   const loadUserInfo = async () => {
     try {
@@ -34,6 +29,11 @@ export const ProfileSettings: FC = () => {
       setLoading(false)
     }
   }
+
+  // 页面加载时获取用户信息
+  useEffect(() => {
+    void loadUserInfo()
+  }, [])
 
   const handleSave = async () => {
     try {
@@ -181,7 +181,7 @@ export const ProfileSettings: FC = () => {
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png,image/jpg"
-              onChange={handleFileChange}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => void handleFileChange(e)}
               className="hidden"
             />
           </div>

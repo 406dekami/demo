@@ -51,3 +51,10 @@ class UserInfoResponse(BaseModel):
     email: str | None
     status: int
 
+
+class UpdateProfileRequest(BaseModel):
+    """更新个人资料请求"""
+    nickname: str | None = Field(None, max_length=64, description="昵称")
+    bio: str | None = Field(None, max_length=500, description="个人签名/简介")
+    avatar: str | None = Field(None, max_length=255, description="头像 URL")
+

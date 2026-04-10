@@ -142,26 +142,51 @@ class Retriever:
     def retrieve_with_rerank(
         self, 
         query: str, 
-        top_k: int = 5,
-        rerank_top_k: int = 3
+        top_k: int = 10,
+        rerank_top_k: int = 5,
+        use_rerank: bool = True
     ) -> List[Dict[str, Any]]:
         """
         检索并重排序（Rerank）
         
         Args:
             query: 查询内容
-            top_k: 初始检索数量
+            top_k: 初始检索数量（建议设置较大值，给 rerank 更多候选）
             rerank_top_k: 重排序后返回的数量
+            use_rerank: 是否启用重排序，默认 True
             
         Returns:
             重排序后的检索结果
         """
-        # TODO: 实现 Rerank 逻辑
-        # 可以先使用 DashScope 或其他 Rerank 模型对初筛结果进行重排序
+        # 1. 先进行初步检索（获取更多候选）
         chunks = self.retrieve(query, top_k=top_k)
         
-        # 当前简化版本：直接返回前 rerank_top_k 条
-        return chunks[:rerank_top_k]
+        if not chunks:
+            return []
+        
+        # 2. 如果启用重排序且检索结果大于 rerank_top_k，则执行重排序
+        if use_rerank and len(chunks) > rerank_top_k:
+            try:
+                from app.rag.reranker import get_reranker
+                
+                logger.info(f"🔄 开始对 {len(chunks)} 条检索结果进行重排序...")
+                reranker = get_reranker()
+                reranked_chunks = reranker.rerank_chunks(
+                    query=query,
+                    chunks=chunks,
+                    top_n=rerank_top_k
+                )
+                
+                logger.info(f"✅ 重排序完成，返回前 {len(reranked_chunks)} 条结果")
+                return reranked_chunks
+                
+            except Exception as e:
+                logger.warning(f"⚠️ 重排序失败，使用原始检索结果：{e}")
+                # 重排序失败时，降级为直接截取前 rerank_top_k 条
+                return chunks[:rerank_top_k]
+        else:
+            # 不需要重排序或结果数量不足，直接返回前 rerank_top_k 条
+            return chunks[:rerank_top_k]
     
     def search_and_generate_context(
         self, 
