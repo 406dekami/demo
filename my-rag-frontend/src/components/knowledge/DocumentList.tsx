@@ -19,7 +19,7 @@ export default function DocumentList({
   onDelete,
 }: DocumentListProps) {
   const { isDark } = useTheme()
-  const [previewDoc, setPreviewDoc] = useState<{ id: string; name: string } | null>(null)
+  const [previewDoc, setPreviewDoc] = useState<{ id: string; name: string; fileType: string } | null>(null)
   const getStatusIcon = (status: Document['status']) => {
     switch (status) {
       case 'uploading':
@@ -92,7 +92,7 @@ export default function DocumentList({
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setPreviewDoc({ id: doc.id, name: doc.name })}
+              onClick={() => setPreviewDoc({ id: doc.id, name: doc.name, fileType: doc.fileType || '' })}
               className={`rounded-lg p-2 transition-colors ${
                 isDark ? 'text-slate-500 hover:bg-sky-500/10 hover:text-sky-400' : 'text-slate-400 hover:bg-sky-50 hover:text-sky-500'
               }`}
@@ -122,6 +122,7 @@ export default function DocumentList({
           kbId={kbId}
           docId={previewDoc.id}
           docName={previewDoc.name}
+          fileType={previewDoc.fileType}
           onClose={() => setPreviewDoc(null)}
         />
       )}

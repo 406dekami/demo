@@ -51,6 +51,7 @@ export const KnowledgeDetailPage: FC<Props> = ({ bases, onAddBase }) => {
       setDocuments(result.map((doc: any) => ({
         id: doc.id,
         name: doc.name,
+        fileType: doc.file_type,
         status: doc.parse_status === 'pending' ? 'processing' : doc.parse_status,
         chunkCount: doc.chunk_count,
         uploadTime: new Date(doc.create_time || Date.now()).toISOString(),

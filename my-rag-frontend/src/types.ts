@@ -26,6 +26,7 @@ export interface Notebook {
 export interface Document {
   id: string
   name: string
+  fileType?: string
   status: 'uploading' | 'processing' | 'done' | 'failed'
   chunkCount?: number
   uploadTime: string

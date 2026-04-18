@@ -217,6 +217,16 @@ export const deleteKnowledgeDocument = async (kbId: string, docId: string): Prom
   }
 }
 
+export const getDocumentPreviewUrl = (kbId: string, docId: string): string => {
+  const token = localStorage.getItem('auth_token') || ''
+  return `/api/v1/knowledge/${kbId}/documents/${docId}/preview?token=${token}`
+}
+
+export const getDocumentDownloadUrl = (kbId: string, docId: string): string => {
+  const token = localStorage.getItem('auth_token') || ''
+  return `/api/v1/knowledge/${kbId}/documents/${docId}/download?token=${token}`
+}
+
 export const uploadKnowledgeFiles = async (kbId: string, files: File[]): Promise<{ files: Array<{ file_id: string; file_name: string }> }> => {
   const formData = new FormData()
   files.forEach((file) => formData.append('files', file))

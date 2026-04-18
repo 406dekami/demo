@@ -7,6 +7,7 @@ import os
 from typing import List, Optional
 
 from fastapi import APIRouter, UploadFile, Request, File
+from fastapi.responses import FileResponse
 
 from ..db import KnowledgeBase, Document, Chunk
 from ..schemas.knowledge import (
@@ -228,6 +229,98 @@ async def delete_knowledge_base(request: Request, kb_id: str):
         return success_response(None, "知识库删除成功")
     except Exception as e:
         logger.error(f"❌ 删除知识库失败：kb_id={kb_id}, error={str(e)}", exc_info=True)
+        return error_response(str(e))
+
+
+@router.get("/{kb_id}/documents/{doc_id}/preview", summary="获取文档预览文件", tags=["知识库"])
+async def preview_document(request: Request, kb_id: str, doc_id: str):
+    """获取文档预览文件（DOC/DOCX转PDF，其他格式直接返回）"""
+    logger.info(f"🖼️ 收到文档预览请求：kb_id={kb_id}, doc_id={doc_id}")
+
+    try:
+        tenant_id = get_tenant_id(request, allow_query_token=True)
+        kb = validate_knowledge_base(kb_id, tenant_id)
+        if not kb:
+            return error_response("知识库不存在或无权访问", code=404)
+
+        doc = Document.get_or_none(
+            (Document.id == doc_id) &
+            (Document.kb_id == kb_id) &
+            (Document.is_deleted == False)
+        )
+        if not doc:
+            return error_response("文档不存在", code=404)
+
+        file_path = doc.file_path
+        file_type = doc.file_type.lower().lstrip('.')
+
+        if not os.path.exists(file_path):
+            return error_response("文件不存在", code=404)
+
+        # DOCX 直接返回原文件，交由前端 docx-preview 渲染
+        if file_type == 'docx':
+            return FileResponse(
+                file_path,
+                media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                filename=doc.name,
+                headers={"Content-Disposition": "inline"}
+            )
+
+        # 旧版 DOC 格式不支持前端渲染，提示下载
+        if file_type == 'doc':
+            return error_response("旧版 .doc 格式不支持在线预览，请下载后用 Word 打开。", code=400)
+
+        # PDF 直接返回
+        if file_type == 'pdf':
+            return FileResponse(
+                file_path,
+                media_type="application/pdf",
+                filename=doc.name,
+                headers={"Content-Disposition": "inline"}
+            )
+
+        # 其他格式返回原文档
+        return FileResponse(
+            file_path,
+            media_type="application/octet-stream",
+            filename=doc.name
+        )
+    except Exception as e:
+        logger.error(f"❌ 预览文档失败：kb_id={kb_id}, doc_id={doc_id}, error={str(e)}", exc_info=True)
+        return error_response(str(e))
+
+
+@router.get("/{kb_id}/documents/{doc_id}/download", summary="下载文档原文", tags=["知识库"])
+async def download_document(request: Request, kb_id: str, doc_id: str):
+    """下载文档原文文件"""
+    logger.info(f" 收到下载文档请求：kb_id={kb_id}, doc_id={doc_id}")
+
+    try:
+        tenant_id = get_tenant_id(request, allow_query_token=True)
+        kb = validate_knowledge_base(kb_id, tenant_id)
+        if not kb:
+            return error_response("知识库不存在或无权访问", code=404)
+
+        doc = Document.get_or_none(
+            (Document.id == doc_id) &
+            (Document.kb_id == kb_id) &
+            (Document.is_deleted == False)
+        )
+        if not doc:
+            return error_response("文档不存在", code=404)
+
+        file_path = doc.file_path
+        if not os.path.exists(file_path):
+            return error_response("文件不存在", code=404)
+
+        # 返回文件，设置正确的文件名
+        return FileResponse(
+            file_path,
+            media_type="application/octet-stream",
+            filename=doc.name
+        )
+    except Exception as e:
+        logger.error(f"❌ 下载文档失败：kb_id={kb_id}, doc_id={doc_id}, error={str(e)}", exc_info=True)
         return error_response(str(e))
 
 

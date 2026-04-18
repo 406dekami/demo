@@ -1,46 +1,73 @@
-import {useEffect, useState} from 'react'
-import {ChevronLeft, ChevronRight, FileText, Loader2, X} from 'lucide-react'
-import {type DocumentChunk, getDocumentChunks, getDocumentContent} from '@/api/knowledge'
+import {useEffect, useRef, useState} from 'react'
+import {ChevronLeft, ChevronRight, Download, FileText, Loader2, X} from 'lucide-react'
+import {type DocumentChunk, getDocumentChunks, getDocumentDownloadUrl, getDocumentPreviewUrl} from '@/api/knowledge'
 import {useTheme} from '@/hooks/useTheme'
+import {renderAsync} from 'docx-preview'
 
 interface DocumentPreviewModalProps {
   kbId: string
   docId: string
   docName: string
+  fileType: string
   onClose: () => void
 }
 
-export default function DocumentPreviewModal({ kbId, docId, docName, onClose }: DocumentPreviewModalProps) {
+export default function DocumentPreviewModal({ kbId, docId, docName, fileType, onClose }: DocumentPreviewModalProps) {
   const { isDark } = useTheme()
-  const [activeTab, setActiveTab] = useState<'original' | 'chunks'>('original')
+  const [activeTab, setActiveTab] = useState<'preview' | 'chunks'>('preview')
   const [loading, setLoading] = useState(false)
-  const [originalContent, setOriginalContent] = useState<string>('')
   const [chunks, setChunks] = useState<DocumentChunk[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalChunks, setTotalChunks] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
+  const cleanFileType = fileType.toLowerCase().replace('.', '')
+  const isPdf = cleanFileType === 'pdf'
+  const isDocx = cleanFileType === 'docx'
+  const isLegacyDoc = cleanFileType === 'doc'
+
+  const previewUrl = getDocumentPreviewUrl(kbId, docId)
+  const downloadUrl = getDocumentDownloadUrl(kbId, docId)
+  const [previewError, setPreviewError] = useState<string | null>(null)
+  const [docxLoading, setDocxLoading] = useState(false)
+
+  const docxContainerRef = useRef<HTMLDivElement>(null)
+
+  // DOCX 预览渲染
   useEffect(() => {
-    if (activeTab === 'original' && !originalContent) {
-      fetchOriginalContent()
-    } else if (activeTab === 'chunks') {
+    if (activeTab === 'preview' && isDocx && docxContainerRef.current) {
+      setDocxLoading(true)
+      setPreviewError(null)
+
+      fetch(previewUrl)
+        .then(async (res) => {
+          if (!res.ok) {
+            const data = await res.json().catch(() => null)
+            throw new Error(data?.message || '预览加载失败')
+          }
+          const blob = await res.blob()
+          await renderAsync(blob, docxContainerRef.current!, undefined, {
+            className: 'docx-container',
+            ignoreWidth: false,
+            ignoreHeight: false,
+            ignoreFonts: false,
+            breakPages: true,
+            experimental: true,
+          })
+        })
+        .catch((err) => {
+          setPreviewError(err instanceof Error ? err.message : '预览加载失败')
+        })
+        .finally(() => setDocxLoading(false))
+    }
+  }, [activeTab, isDocx, previewUrl])
+
+  useEffect(() => {
+    if (activeTab === 'chunks') {
       fetchChunks()
     }
   }, [activeTab, currentPage])
-
-  const fetchOriginalContent = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await getDocumentContent(kbId, docId)
-      setOriginalContent(data.content || '暂无内容')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '加载失败')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const fetchChunks = async () => {
     setLoading(true)
@@ -60,7 +87,7 @@ export default function DocumentPreviewModal({ kbId, docId, docName, onClose }: 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
       <div
-        className={`relative flex h-[80vh] w-[80vw] max-w-5xl flex-col rounded-2xl border shadow-2xl ${
+        className={`relative flex h-[85vh] w-[85vw] max-w-6xl flex-col rounded-2xl border shadow-2xl ${
           isDark ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-white'
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -71,46 +98,48 @@ export default function DocumentPreviewModal({ kbId, docId, docName, onClose }: 
             <FileText className={`h-5 w-5 ${isDark ? 'text-sky-400' : 'text-sky-600'}`} />
             <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{docName}</h3>
           </div>
-          <button
-            onClick={onClose}
-            className={`rounded-lg p-2 transition-colors ${
-              isDark ? 'text-slate-400 hover:bg-slate-800 hover:text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <a
+              href={downloadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                isDark ? 'bg-slate-800 text-sky-400 hover:bg-slate-700' : 'bg-sky-50 text-sky-600 hover:bg-sky-100'
+              }`}
+              title="下载原文"
+            >
+              <Download className="h-3.5 w-3.5" />
+              下载原文
+            </a>
+            <button
+              onClick={onClose}
+              className={`rounded-lg p-2 transition-colors ${
+                isDark ? 'text-slate-400 hover:bg-slate-800 hover:text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}
         <div className={`flex gap-1 border-b px-6 ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
           <button
-            onClick={() => {
-              setActiveTab('original')
-            }}
+            onClick={() => setActiveTab('preview')}
             className={`rounded-t-lg px-4 py-2 text-sm font-medium transition-colors ${
-              activeTab === 'original'
-                ? isDark
-                  ? 'bg-slate-800 text-sky-400'
-                  : 'bg-white text-sky-600'
-                : isDark
-                ? 'text-slate-400 hover:text-slate-300'
-                : 'text-slate-500 hover:text-slate-700'
+              activeTab === 'preview'
+                ? isDark ? 'bg-slate-800 text-sky-400' : 'bg-white text-sky-600'
+                : isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            原文内容
+            文件预览
           </button>
           <button
-            onClick={() => {
-              setActiveTab('chunks')
-            }}
+            onClick={() => setActiveTab('chunks')}
             className={`rounded-t-lg px-4 py-2 text-sm font-medium transition-colors ${
               activeTab === 'chunks'
-                ? isDark
-                  ? 'bg-slate-800 text-sky-400'
-                  : 'bg-white text-sky-600'
-                : isDark
-                ? 'text-slate-400 hover:text-slate-300'
-                : 'text-slate-500 hover:text-slate-700'
+                ? isDark ? 'bg-slate-800 text-sky-400' : 'bg-white text-sky-600'
+                : isDark ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             分块结果 ({totalChunks})
@@ -118,27 +147,82 @@ export default function DocumentPreviewModal({ kbId, docId, docName, onClose }: 
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-6">
-          {activeTab === 'original' && (
-            <div>
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-6 w-6 animate-spin text-sky-500" />
-                </div>
-              ) : error ? (
-                <div className={`rounded-xl border p-4 ${isDark ? 'border-rose-500/30 bg-rose-500/10 text-rose-400' : 'border-rose-200 bg-rose-50 text-rose-600'}`}>
-                  <p className="text-sm">{error}</p>
-                </div>
-              ) : (
-                <div className={`rounded-xl border p-4 whitespace-pre-wrap text-sm leading-relaxed ${isDark ? 'border-slate-700 bg-slate-950 text-slate-300' : 'border-slate-200 bg-slate-50 text-slate-700'}`}>
-                  {originalContent || '暂无内容'}
+        <div className="flex-1 overflow-auto">
+          {activeTab === 'preview' && (
+            <div className="h-full">
+              {/* PDF: iframe */}
+              {isPdf && (
+                previewError ? (
+                  <div className="flex h-full flex-col items-center justify-center p-8 text-center">
+                    <FileText className={`mb-4 h-16 w-16 ${isDark ? 'text-slate-600' : 'text-slate-300'}`} />
+                    <p className={`mb-2 text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{previewError}</p>
+                    <a
+                      href={downloadUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-500"
+                    >
+                      <Download className="h-4 w-4" />
+                      下载原文
+                    </a>
+                  </div>
+                ) : (
+                  <iframe
+                    src={previewUrl}
+                    className="h-full w-full border-0"
+                    title="文档预览"
+                  />
+                )
+              )}
+
+              {/* DOCX: docx-preview */}
+              {isDocx && (
+                docxLoading ? (
+                  <div className="flex h-full items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
+                  </div>
+                ) : previewError ? (
+                  <div className="flex h-full flex-col items-center justify-center p-8 text-center">
+                    <FileText className={`mb-4 h-16 w-16 ${isDark ? 'text-slate-600' : 'text-slate-300'}`} />
+                    <p className={`mb-2 text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{previewError}</p>
+                    <a
+                      href={downloadUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-500"
+                    >
+                      <Download className="h-4 w-4" />
+                      下载原文
+                    </a>
+                  </div>
+                ) : (
+                  <div ref={docxContainerRef} className="h-full overflow-auto bg-white" />
+                )
+              )}
+
+              {/* 旧版 .doc: 提示下载 */}
+              {isLegacyDoc && (
+                <div className="flex h-full flex-col items-center justify-center p-8 text-center">
+                  <FileText className={`mb-4 h-16 w-16 ${isDark ? 'text-slate-600' : 'text-slate-300'}`} />
+                  <p className={`mb-2 text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                    旧版 .doc 格式不支持在线预览，请下载后用 Word 打开
+                  </p>
+                  <a
+                    href={downloadUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-500"
+                  >
+                    <Download className="h-4 w-4" />
+                    下载原文
+                  </a>
                 </div>
               )}
             </div>
           )}
 
           {activeTab === 'chunks' && (
-            <div>
+            <div className="p-6">
               {loading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-6 w-6 animate-spin text-sky-500" />
