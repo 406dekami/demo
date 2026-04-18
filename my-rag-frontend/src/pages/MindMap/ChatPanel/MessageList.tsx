@@ -1,8 +1,8 @@
-import { type FC, useRef } from 'react'
-import { MessageSquare } from 'lucide-react'
-import type { Message as MessageType } from './types'
-import { MarkdownContent } from './MarkdownContent'
-import { useTheme } from '@/hooks/useTheme'
+import {type FC, useRef} from 'react'
+import {MessageSquare} from 'lucide-react'
+import type {Message as MessageType} from './types'
+import {MarkdownContent} from './MarkdownContent'
+import {useTheme} from '@/hooks/useTheme'
 
 interface MessageListProps {
   messages: MessageType[]
@@ -33,16 +33,22 @@ export const MessageList: FC<MessageListProps> = ({ messages, loading }) => {
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                 message.role === 'user'
-                  ? isDark ? 'bg-sky-600 text-white' : 'bg-sky-500 text-white'
-                  : isDark ? 'bg-gray-800 text-gray-100' : 'bg-slate-100 text-slate-900'
+                  ? isDark ? 'bg-sky-500/20 text-sky-50 border border-sky-500/30' : 'bg-sky-100 text-sky-900'
+                  : 'bg-transparent'
               }`}
             >
               {message.role === 'user' ? (
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
               ) : (
-                <MarkdownContent content={message.content} />
+                <div className={isDark ? 'text-gray-100' : 'text-slate-900'}>
+                  <MarkdownContent content={message.content} />
+                </div>
               )}
-              <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-slate-400'}`}>
+              <p className={`text-xs mt-1 ${
+                message.role === 'user' 
+                  ? 'text-right ' + (isDark ? 'text-sky-200' : 'text-sky-700/70') 
+                  : (isDark ? 'text-gray-500' : 'text-slate-400')
+              }`}>
                 {new Date(message.timestamp).toLocaleTimeString('zh-CN', {
                   hour: '2-digit',
                   minute: '2-digit',

@@ -1,17 +1,18 @@
 /**
  * 问答面板组件 - 主文件
  */
-import { useState, useEffect, useRef, useMemo } from 'react'
-import { useTheme } from '@/hooks/useTheme'
-import type { MindMapNode, ChatRequest } from '@/api/mindMap'
-import { getNodeQuestions, sendQuestion } from '@/api/mindMap'
+import {useEffect, useMemo, useRef, useState} from 'react'
+import {useTheme} from '@/hooks/useTheme'
+import type {ChatRequest, MindMapNode} from '@/api/mindMap'
+import {getNodeQuestions, sendQuestion} from '@/api/mindMap'
 import toast from 'react-hot-toast'
-import type { Conversation } from './types'
-import { ChatHeader } from './ChatHeader'
-import { MessageList } from './MessageList'
-import { QuickQuestions } from './QuickQuestions'
-import { ChatInput } from './ChatInput'
-import { ResizeHandle } from './ResizeHandle'
+import type {Conversation} from './types'
+import {ChatHeader} from './ChatHeader'
+import {MessageList} from './MessageList'
+import {QuickQuestions} from './QuickQuestions'
+import {ChatInput} from './ChatInput'
+import {ResizeHandle} from './ResizeHandle'
+
 // import { CollapseButton } from './CollapseButton'
 
 interface ChatPanelProps {
@@ -259,6 +260,14 @@ export const ChatPanel = ({ node, onToggleCollapse, isCollapsed }: ChatPanelProp
     setShowHistory(false)
   }
 
+  const deleteConversation = (convId: string) => {
+    setConversations(prev => prev.filter(c => c.id !== convId))
+    if (activeConversationId === convId) {
+      setActiveConversationId(undefined)
+    }
+    localStorage.removeItem(`mindmap-active-conversation-${node.id}`)
+  }
+
   const handleSendMessage = async () => {
     await handleSend(input)
   }
@@ -292,6 +301,7 @@ export const ChatPanel = ({ node, onToggleCollapse, isCollapsed }: ChatPanelProp
             onCreateNew={createNewConversation}
             onCollapse={onToggleCollapse}
             onSwitchConversation={switchConversation}
+            onDeleteConversation={deleteConversation}
           />
         )}
 

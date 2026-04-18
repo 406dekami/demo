@@ -1,9 +1,9 @@
-import { type FC } from 'react'
-import { Plus, History } from 'lucide-react'
-import type { MindMapNode } from '@/api/mindMap'
-import type { Conversation } from './types'
-import { ConversationWheel } from './ConversationWheel'
-import { useTheme } from '@/hooks/useTheme'
+import {type FC} from 'react'
+import {History, Plus} from 'lucide-react'
+import type {MindMapNode} from '@/api/mindMap'
+import type {Conversation} from './types'
+import {ConversationWheel} from './ConversationWheel'
+import {useTheme} from '@/hooks/useTheme'
 
 interface ChatHeaderProps {
   node: MindMapNode
@@ -14,6 +14,7 @@ interface ChatHeaderProps {
   onCreateNew: () => void
   onCollapse: () => void
   onSwitchConversation: (convId: string) => void
+  onDeleteConversation: (convId: string) => void
 }
 
 export const ChatHeader: FC<ChatHeaderProps> = ({
@@ -24,7 +25,8 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
   onToggleHistory,
   onCreateNew,
   onCollapse,
-  onSwitchConversation
+  onSwitchConversation,
+  onDeleteConversation
 }) => {
   const { isDark } = useTheme()
   return (
@@ -42,40 +44,34 @@ export const ChatHeader: FC<ChatHeaderProps> = ({
         <History className="w-5 h-5" />
       </button>
 
-      <div className="flex-1 min-w-0 h-full relative">
-        <div className={`absolute inset-0 flex flex-col justify-center transition-opacity duration-200 ${showHistory ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-          {(() => {
-            const conv = activeConversationId ? conversations.find(c => c.id === activeConversationId) : null
-            return conv ? (
-              <>
-                <h3 className={`font-medium text-sm truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{conv.title}</h3>
-                <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-slate-400'}`}>
-                  {`${conv.messages.length} 条消息 · ${new Date(conv.updatedAt).toLocaleDateString('zh-CN')}`}
-                </p>
-              </>
-            ) : (
-              <>
-                <h3 className={`font-medium text-sm truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{node.title}</h3>
-                <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-slate-400'}`}>{node.is_leaf ? '知识点' : '章节'}</p>
-              </>
-            )
-          })()}
-        </div>
-
-        {showHistory && (
-          <div className="absolute inset-0 flex items-center">
-            <div className="relative h-full overflow-hidden flex items-center" style={{ maxWidth: '70%' }}>
-              <div className="absolute top-0 left-0 right-0 h-6 bg-linear-to-b from-gray-900 to-transparent z-10 pointer-events-none" />
-              <div className="absolute bottom-0 left-0 right-0 h-6 bg-linear-to-t from-gray-900 to-transparent z-10 pointer-events-none" />
-              
-              <div className="absolute top-1/2 left-0 right-0 h-10 -translate-y-1/2 border-y z-0 pointer-events-none rounded ${isDark ? 'bg-white/5 border-gray-600/50' : 'bg-slate-100/80 border-slate-300/50'}" />
-              
-              <ConversationWheel
-                conversations={conversations}
-                activeConversationId={activeConversationId}
-                onSwitch={onSwitchConversation}
-              />
-            </div>
+      <div className="flex-1 min-w-0 h-full flex items-center">
+        {showHistory ? (
+          <div className="w-full overflow-hidden" style={{ maxWidth: '70%' }}>
+            <ConversationWheel
+              conversations={conversations}
+              activeConversationId={activeConversationId}
+              onSwitch={onSwitchConversation}
+              onDelete={onDeleteConversation}
+            />
+          </div>
+        ) : (
+          <div className="h-full flex flex-col justify-center">
+            {(() => {
+              const conv = activeConversationId ? conversations.find(c => c.id === activeConversationId) : null
+              return conv ? (
+                <>
+                  <h3 className={`font-medium text-sm truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{conv.title}</h3>
+                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-slate-400'}`}>
+                    {`${conv.messages.length} 条消息 · ${new Date(conv.updatedAt).toLocaleDateString('zh-CN')}`}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3 className={`font-medium text-sm truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{node.title}</h3>
+                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-slate-400'}`}>{node.is_leaf ? '知识点' : '章节'}</p>
+                </>
+              )
+            })()}
           </div>
         )}
       </div>
