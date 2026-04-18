@@ -30,6 +30,8 @@ dependencies = [
     "redis>=5.0.0", # Redis 缓存
     "loguru>=0.7.0", # 日志库
     "olefile>=0.47", # .doc 文件解析
+    "bcrypt>=4.0.0", # 密码哈希
+    "pywin32>=306; sys_platform == 'win32'", # Windows 环境下 .doc 转 .docx
 ]
 
 [tool.pytest.ini_options]
