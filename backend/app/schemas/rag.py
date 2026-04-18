@@ -1,7 +1,9 @@
 """
-RAG 相关请求和响应模型
+RAG 相关请求模型
+
+注意：响应已统一使用 success_response/error_response，不再定义 Response Schema
 """
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 
 
@@ -13,12 +15,12 @@ class NotebookCreateRequest(BaseModel):
     model_name: Optional[str] = "qwen-plus"
     system_prompt: Optional[str] = None
 
-
-class NotebookResponse(BaseModel):
-    """笔记本响应"""
-    notebook_id: str
-    title: str
-    kb_ids: List[str] = []
+    @field_validator("kb_ids")
+    @classmethod
+    def validate_single_kb(cls, value: Optional[List[str]]):
+        if value and len(value) > 1:
+            raise ValueError("当前版本仅支持关联一个知识库")
+        return value
 
 
 class ProcessDocumentRequest(BaseModel):
@@ -35,30 +37,3 @@ class QueryRequest(BaseModel):
     conversation_id: Optional[str] = Field(None, description="对话 ID")
     use_knowledge_graph: bool = Field(True, description="是否使用知识图谱检索")
 
-
-class UploadResponse(BaseModel):
-    """上传响应"""
-    code: int = Field(0, description="状态码")
-    message: Optional[str] = Field(None, description="提示信息")
-    data: Optional[dict] = Field(None, description="响应数据")
-
-
-class ProcessResponse(BaseModel):
-    """处理响应"""
-    code: int = Field(0, description="状态码")
-    message: Optional[str] = Field(None, description="提示信息")
-    data: Optional[dict] = Field(None, description="响应数据")
-
-
-class QueryResponse(BaseModel):
-    """查询响应"""
-    code: int = Field(0, description="状态码")
-    message: Optional[str] = Field(None, description="提示信息")
-    data: Optional[dict] = Field(None, description="响应数据")
-
-
-class NotebookCreateResponse(BaseModel):
-    """笔记本创建/更新响应"""
-    code: int = Field(0, description="状态码")
-    message: str = Field("", description="提示信息")
-    data: dict = Field(..., description="响应数据")

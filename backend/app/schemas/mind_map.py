@@ -27,33 +27,7 @@ class MindMapNodeSchema(BaseModel):
         from_attributes = True
 
 
-class MindMapTreeResponse(BaseModel):
-    """思维导图树形结构响应"""
-    success: bool = True
-    data: Optional[Dict[str, Any]] = None
-    message: str = "success"
-
-
-class MindMapPathResponse(BaseModel):
-    """节点路径响应"""
-    success: bool = True
-    data: List[Dict[str, Any]] = []
-    message: str = "success"
-
-
-class MindMapNodeResponse(BaseModel):
-    """单个节点响应"""
-    success: bool = True
-    data: Optional[Dict[str, Any]] = None
-    message: str = "success"
-
-
-class MindMapQuestionsResponse(BaseModel):
-    """推荐问题响应"""
-    success: bool = True
-    data: List[str] = []
-    message: str = "success"
-
+# 请求模型
 
 class CreateNodeRequest(BaseModel):
     """创建节点请求"""
@@ -91,10 +65,3 @@ class ChatRequest(BaseModel):
     node_id: str = Field(..., description="节点 ID")
     question: str = Field(..., description="用户问题")
     conversation_id: Optional[str] = Field(None, description="会话 ID")
-
-
-class MindMapChatResponse(BaseModel):
-    """聊天响应"""
-    success: bool = True
-    data: Dict[str, Any] = Field(default_factory=dict, description="响应数据")
-    message: str = "success"

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
 模型管理相关的 Pydantic Schema 定义
+
+注意：响应已统一使用 success_response/error_response，不再定义 ApiResponse
 """
 from typing import Optional
 
@@ -22,10 +24,3 @@ class AddModelRequest(BaseModel):
     model_type: str = Field(..., description="模型类型")
     api_key: Optional[str] = Field(None, description="API 密钥")
     base_url: Optional[str] = Field(None, description="基础 URL")
-
-
-class ApiResponse(BaseModel):
-    """统一响应格式"""
-    code: int = Field(0, description="状态码")
-    message: Optional[str] = Field(None, description="提示信息")
-    data: Optional[dict] = Field(None, description="响应数据")
