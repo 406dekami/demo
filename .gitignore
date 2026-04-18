@@ -13,7 +13,7 @@
 /backend/app/data/uploads/
 **/chroma.sqlite3
 **/*.bin
-
+/backend/data/
 # 日志
 /backend/logs/
 
