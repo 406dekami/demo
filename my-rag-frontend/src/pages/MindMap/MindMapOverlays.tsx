@@ -14,7 +14,6 @@ type ZoomControlsProps = {
   scale: number
   onZoomOut: () => void
   onZoomIn: () => void
-  onReset: () => void
 }
 
 type PathBreadcrumbProps = {
@@ -66,14 +65,26 @@ export const FocusCard: FC<FocusCardProps> = ({ title, subtitle, onOpenChat }) =
   )
 }
 
-export const ZoomControls: FC<ZoomControlsProps> = ({ scale, onZoomOut, onZoomIn, onReset }) => {
+export const ZoomControls: FC<ZoomControlsProps> = ({ scale, onZoomOut, onZoomIn }) => {
   const { isDark } = useTheme()
+
+  const handleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`)
+      })
+    } else {
+      document.exitFullscreen()
+    }
+  }
   return (
     <div className={`fixed bottom-4 right-4 z-20 flex items-center gap-2 rounded-2xl border p-2 shadow-xl backdrop-blur-sm ${isDark ? 'border-slate-700/80 bg-slate-900/92' : 'border-blue-200/60 bg-white/90'}`}>
       <button type="button" onClick={onZoomOut} className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${isDark ? 'text-slate-400 hover:bg-slate-800 hover:text-sky-300' : 'text-slate-500 hover:bg-slate-100 hover:text-sky-500'}`} aria-label="缩小"><ZoomOut className="h-4 w-4" /></button>
       <span className={`min-w-14 text-center text-xs font-mono ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>{Math.round(scale * 100)}%</span>
       <button type="button" onClick={onZoomIn} className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${isDark ? 'text-slate-400 hover:bg-slate-800 hover:text-sky-300' : 'text-slate-500 hover:bg-slate-100 hover:text-sky-500'}`} aria-label="放大"><ZoomIn className="h-4 w-4" /></button>
-      <button type="button" onClick={onReset} className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${isDark ? 'text-slate-400 hover:bg-slate-800 hover:text-sky-300' : 'text-slate-500 hover:bg-slate-100 hover:text-sky-500'}`} aria-label="重置缩放"><Maximize2 className="h-4 w-4" /></button>
+      <button type="button" onClick={handleFullscreen} className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${isDark ? 'text-slate-400 hover:bg-slate-800 hover:text-sky-300' : 'text-slate-500 hover:bg-slate-100 hover:text-sky-500'}`} aria-label="全屏" title="进入全屏 (F11)">
+        <Maximize2 className="h-4 w-4" />
+      </button>
     </div>
   )
 }

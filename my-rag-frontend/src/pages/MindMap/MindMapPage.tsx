@@ -337,7 +337,7 @@ export const MindMapPage: FC = () => {
             {tooltip && <TooltipCard tooltip={tooltip} />}
           </div>
         </section>
-        <ZoomControls scale={view.scale} onZoomOut={() => zoomByButton(-0.15)} onZoomIn={() => zoomByButton(0.15)} onReset={resetView} />
+        <ZoomControls scale={view.scale} onZoomOut={() => zoomByButton(-0.15)} onZoomIn={() => zoomByButton(0.15)} />
         {selected && <PathBreadcrumb pathText={pathText} />}
       </div>
 
