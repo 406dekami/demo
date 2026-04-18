@@ -178,7 +178,7 @@ export const KnowledgeDetailPage: FC<Props> = ({ bases, onAddBase }) => {
           <section className={`rounded-2xl border p-4 ${isDark ? 'border-slate-800 bg-slate-900/60' : 'border-slate-200 bg-white'}`}>
             <h2 className={`mb-3 text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>文档管理</h2>
             <UploadZone kbId={id!} disabled={!isEditMode} />
-            {documents.length > 0 && <div className="mt-4"><DocumentList documents={documents} isEditMode={isEditMode} onDelete={handleDeleteDocument} /></div>}
+            {documents.length > 0 && <div className="mt-4"><DocumentList kbId={id!} documents={documents} isEditMode={isEditMode} onDelete={handleDeleteDocument} /></div>}
           </section>
         </div>
 

@@ -1,20 +1,25 @@
 // my-rag-frontend/src/components/knowledge/DocumentList.tsx
-import {AlertCircle, CheckCircle, FileText, Loader2, Trash2} from 'lucide-react'
+import {AlertCircle, CheckCircle, Eye, FileText, Loader2, Trash2} from 'lucide-react'
+import {useState} from 'react'
 import type {Document} from '@/types'
 import {useTheme} from '@/hooks/useTheme'
+import DocumentPreviewModal from './DocumentPreviewModal'
 
 interface DocumentListProps {
+  kbId: string
   documents: Document[]
   isEditMode: boolean
   onDelete: (docId: string) => void
 }
 
 export default function DocumentList({
+  kbId,
   documents,
   isEditMode,
   onDelete,
 }: DocumentListProps) {
   const { isDark } = useTheme()
+  const [previewDoc, setPreviewDoc] = useState<{ id: string; name: string } | null>(null)
   const getStatusIcon = (status: Document['status']) => {
     switch (status) {
       case 'uploading':
@@ -85,17 +90,41 @@ export default function DocumentList({
             </div>
           </div>
 
-          {isEditMode && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => onDelete(doc.id)}
-              className={`ml-4 rounded-lg p-2 transition-colors ${isDark ? 'text-slate-500 hover:bg-rose-500/10 hover:text-rose-400' : 'text-slate-400 hover:bg-rose-50 hover:text-rose-500'}`}
-              aria-label="删除文档"
+              onClick={() => setPreviewDoc({ id: doc.id, name: doc.name })}
+              className={`rounded-lg p-2 transition-colors ${
+                isDark ? 'text-slate-500 hover:bg-sky-500/10 hover:text-sky-400' : 'text-slate-400 hover:bg-sky-50 hover:text-sky-500'
+              }`}
+              aria-label="预览文档"
+              title="预览"
             >
-              <Trash2 className="h-5 w-5" />
+              <Eye className="h-5 w-5" />
             </button>
-          )}
+            {isEditMode && (
+              <button
+                onClick={() => onDelete(doc.id)}
+                className={`rounded-lg p-2 transition-colors ${
+                  isDark ? 'text-slate-500 hover:bg-rose-500/10 hover:text-rose-400' : 'text-slate-400 hover:bg-rose-50 hover:text-rose-500'
+                }`}
+                aria-label="删除文档"
+                title="删除"
+              >
+                <Trash2 className="h-5 w-5" />
+              </button>
+            )}
+          </div>
         </div>
       ))}
+
+      {previewDoc && (
+        <DocumentPreviewModal
+          kbId={kbId}
+          docId={previewDoc.id}
+          docName={previewDoc.name}
+          onClose={() => setPreviewDoc(null)}
+        />
+      )}
     </div>
   )
 }

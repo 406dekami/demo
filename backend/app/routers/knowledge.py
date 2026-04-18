@@ -2,18 +2,20 @@
 """
 知识库管理业务模块 - FastAPI 路由
 """
-from fastapi import APIRouter, UploadFile, Request, File
-from typing import List, Optional
 import logging
+import os
+from typing import List, Optional
+
+from fastapi import APIRouter, UploadFile, Request, File
 
 from ..db import KnowledgeBase, Document, Chunk
 from ..schemas.knowledge import (
     KnowledgeBaseCreateRequest,
     KnowledgeBaseUpdateRequest,
 )
-from ..utils.get_tenant_id import get_tenant_id
-from ..utils.file_upload import validate_knowledge_base, process_uploaded_files
 from ..utils.api_response import success_response, error_response
+from ..utils.file_upload import validate_knowledge_base, process_uploaded_files
+from ..utils.get_tenant_id import get_tenant_id
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -223,6 +225,142 @@ async def delete_knowledge_base(request: Request, kb_id: str):
         return success_response(None, "知识库删除成功")
     except Exception as e:
         logger.error(f"❌ 删除知识库失败：kb_id={kb_id}, error={str(e)}", exc_info=True)
+        return error_response(str(e))
+
+
+@router.get("/{kb_id}/documents/{doc_id}/content", summary="获取文档原文内容", tags=["知识库"])
+async def get_document_content(request: Request, kb_id: str, doc_id: str):
+    """获取指定文档的原文内容，用于预览"""
+    logger.info(f" 收到获取文档内容请求：kb_id={kb_id}, doc_id={doc_id}")
+
+    try:
+        tenant_id = get_tenant_id(request)
+        kb = validate_knowledge_base(kb_id, tenant_id)
+        if not kb:
+            return error_response("知识库不存在或无权访问", code=404)
+
+        doc = Document.get_or_none(
+            (Document.id == doc_id) &
+            (Document.kb_id == kb_id) &
+            (Document.is_deleted == False)
+        )
+        if not doc:
+            return error_response("文档不存在", code=404)
+
+        # 读取文件内容
+        file_path = doc.file_path
+        file_type = doc.file_type.lower().lstrip('.')
+
+        content = ""
+        
+        if file_type == 'txt' or file_type == 'md':
+            # 纯文本文件直接读取
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+            except UnicodeDecodeError:
+                with open(file_path, 'r', encoding='gbk') as f:
+                    content = f.read()
+        elif file_type == 'pdf':
+            # PDF 使用 pdfplumber 解析
+            try:
+                import pdfplumber
+                with pdfplumber.open(file_path) as pdf:
+                    for page in pdf.pages:
+                        text = page.extract_text()
+                        if text:
+                            content += text + "\n\n"
+            except Exception as e:
+                logger.error(f"PDF解析失败: {e}")
+                return error_response(f"PDF解析失败：{str(e)}")
+        elif file_type == 'docx':
+            # DOCX 使用 python-docx 解析
+            try:
+                from docx import Document as DocxDocument
+                doc_obj = DocxDocument(file_path)
+                for para in doc_obj.paragraphs:
+                    content += para.text + "\n"
+            except Exception as e:
+                logger.error(f"DOCX解析失败: {e}")
+                return error_response(f"DOCX解析失败：{str(e)}")
+        elif file_type == 'doc':
+            # DOC 复用已有的解析逻辑
+            try:
+                from ..rag.document_loader import DocumentLoader
+                loader = DocumentLoader()
+                result = loader.load_document(file_path)
+                content = "\n\n".join([r['text'] for r in result])
+            except Exception as e:
+                logger.error(f"DOC解析失败: {e}")
+                return error_response(f"DOC解析失败：{str(e)}")
+        else:
+            return error_response(f"不支持的文件类型：{file_type}")
+
+        return success_response({
+            "kb_id": kb_id,
+            "doc_id": doc_id,
+            "doc_name": doc.name,
+            "file_type": file_type,
+            "content": content
+        })
+    except Exception as e:
+        logger.error(f"❌ 获取文档内容失败：kb_id={kb_id}, doc_id={doc_id}, error={str(e)}", exc_info=True)
+        return error_response(str(e))
+
+
+@router.get("/{kb_id}/documents/{doc_id}/chunks", summary="获取文档分块内容", tags=["知识库"])
+async def get_document_chunks(request: Request, kb_id: str, doc_id: str, page: int = 1, page_size: int = 10):
+    """获取指定文档的 Chunk 列表，用于预览向量化结果"""
+    logger.info(f"👁️ 收到获取文档分块请求：kb_id={kb_id}, doc_id={doc_id}")
+
+    try:
+        tenant_id = get_tenant_id(request)
+        kb = validate_knowledge_base(kb_id, tenant_id)
+        if not kb:
+            return error_response("知识库不存在或无权访问", code=404)
+
+        doc = Document.get_or_none(
+            (Document.id == doc_id) &
+            (Document.kb_id == kb_id) &
+            (Document.is_deleted == False)
+        )
+        if not doc:
+            return error_response("文档不存在", code=404)
+
+        # 分页查询 Chunk
+        total = Chunk.select().where(
+            (Chunk.document_id == doc_id) &
+            (Chunk.is_deleted == False)
+        ).count()
+
+        chunks = Chunk.select().where(
+            (Chunk.document_id == doc_id) &
+            (Chunk.is_deleted == False)
+        ).order_by(Chunk.create_time.asc()).limit(page_size).offset((page - 1) * page_size)
+
+        result = []
+        for idx, chunk in enumerate(chunks, start=(page - 1) * page_size + 1):
+            result.append({
+                "id": chunk.id,
+                "chunk_index": idx,
+                "content": chunk.content,
+                "meta_info": chunk.meta_info,
+                "create_time": chunk.create_time
+            })
+
+        return success_response({
+            "kb_id": kb_id,
+            "doc_id": doc_id,
+            "doc_name": doc.name,
+            "file_type": doc.file_type,
+            "file_path": doc.file_path,
+            "chunks": result,
+            "total": total,
+            "page": page,
+            "page_size": page_size
+        })
+    except Exception as e:
+        logger.error(f"❌ 获取文档分块失败：kb_id={kb_id}, doc_id={doc_id}, error={str(e)}", exc_info=True)
         return error_response(str(e))
 
 

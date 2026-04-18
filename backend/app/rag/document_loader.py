@@ -141,34 +141,65 @@ class DocumentLoader:
                 import tempfile
                 
                 logging.info("使用 COM 接口解析 .doc 文件...")
-                word = win32com.client.Dispatch("Word.Application")
-                word.Visible = False
+                word = None
+                doc = None
                 
-                # 打开 .doc 文件
-                doc = word.Documents.Open(os.path.abspath(file_path))
-                
-                # 另存为 .docx 临时文件
-                temp_docx = tempfile.mktemp(suffix=".docx")
-                doc.SaveAs2(temp_docx, FileFormat=16)  # 16 = docx format
-                doc.Close()
-                word.Quit()
-                
-                # 用 python-docx 解析临时文件
-                temp_doc = DocxDocument(temp_docx)
-                text = ""
-                for paragraph in temp_doc.paragraphs:
-                    text += paragraph.text + "\n"
-                
-                # 清理临时文件
-                os.remove(temp_docx)
-                
-                if text and text.strip():
-                    content.append({
-                        "text": text,
-                        "source": os.path.basename(file_path)
-                    })
-                    logging.info(f"COM 接口解析成功，提取文本长度：{len(text)}")
-                    return content
+                try:
+                    word = win32com.client.Dispatch("Word.Application")
+                    word.Visible = False
+                    word.DisplayAlerts = 0  # 0 = wdAlertsNone
+                    
+                    # 打开 .doc 文件
+                    doc = word.Documents.Open(os.path.abspath(file_path))
+                    
+                    # 另存为 .docx 临时文件
+                    temp_docx = tempfile.mktemp(suffix=".docx")
+                    doc.SaveAs2(temp_docx, FileFormat=16)  # 16 = docx format
+                    
+                    if doc:
+                        doc.Close(SaveChanges=False)
+                    if word:
+                        word.Quit()
+                    
+                    # 强制释放 COM 对象
+                    import gc
+                    del doc
+                    del word
+                    gc.collect()
+                    
+                    # 用 python-docx 解析临时文件
+                    temp_doc = DocxDocument(temp_docx)
+                    text = ""
+                    for paragraph in temp_doc.paragraphs:
+                        text += paragraph.text + "\n"
+                    
+                    # 清理临时文件
+                    if os.path.exists(temp_docx):
+                        os.remove(temp_docx)
+                    
+                    if text and text.strip():
+                        content.append({
+                            "text": text,
+                            "source": os.path.basename(file_path)
+                        })
+                        logging.info(f"COM 接口解析成功，提取文本长度：{len(text)}")
+                        return content
+                except Exception as e:
+                    # 确保在出错时也清理 COM 资源
+                    try:
+                        if doc:
+                            doc.Close(SaveChanges=False)
+                    except:
+                        pass
+                    try:
+                        if word:
+                            word.Quit()
+                    except:
+                        pass
+                    import gc
+                    gc.collect()
+                    raise e
+                    
             except ImportError:
                 logging.info("pywin32 未安装，跳过 COM 接口解析")
             except Exception as e:

@@ -153,6 +153,63 @@ export const getKnowledgeBaseDocuments = async (kbId: string) => {
   return response.data.data?.documents || []
 }
 
+export interface DocumentChunk {
+  id: string
+  chunk_index: number
+  content: string
+  meta_info?: string
+  create_time?: number
+}
+
+export interface DocumentPreviewData {
+  kb_id: string
+  doc_id: string
+  doc_name: string
+  file_type: string
+  file_path: string
+  chunks: DocumentChunk[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export interface DocumentContentData {
+  kb_id: string
+  doc_id: string
+  doc_name: string
+  file_type: string
+  content: string
+}
+
+export const getDocumentContent = async (
+  kbId: string,
+  docId: string
+): Promise<DocumentContentData> => {
+  const response = await apiClient.get<ApiResponse<DocumentContentData>>(
+    `/knowledge/${kbId}/documents/${docId}/content`
+  )
+  if (response.data.code !== 0 || !response.data.data) {
+    throw new Error(response.data.message || '获取文档内容失败')
+  }
+  return response.data.data
+}
+
+export const getDocumentChunks = async (
+  kbId: string,
+  docId: string,
+  page = 1,
+  pageSize = 10
+): Promise<DocumentPreviewData> => {
+  const response = await apiClient.get<ApiResponse<DocumentPreviewData>>(
+    `/knowledge/${kbId}/documents/${docId}/chunks`,
+    { params: { page, page_size: pageSize } }
+  )
+  if (response.data.code !== 0 || !response.data.data) {
+    throw new Error(response.data.message || '获取文档内容失败')
+  }
+  return response.data.data
+}
+
 export const deleteKnowledgeDocument = async (kbId: string, docId: string): Promise<void> => {
   const response = await apiClient.delete<ApiResponse>(`/knowledge/${kbId}/documents/${docId}/delete`)
   if (response.data.code !== 0) {
