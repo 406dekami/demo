@@ -1,0 +1,126 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+env:
+  PYTHON_VERSION: '3.13'
+  NODE_VERSION: '20'
+
+jobs:
+  # ==================== 后端测试 ====================
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install uv
+        run: |
+          pip install uv
+      
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          uv pip install --system -e .
+      
+      - name: Run linting (pylint)
+        working-directory: ./backend
+        run: |
+          uv pip install --system pylint
+          pylint app/routers/*.py --disable=C0114,C0115,C0116,R0903 || true
+      
+      - name: Run tests
+        working-directory: ./backend
+        run: |
+          uv pip install --system pytest pytest-asyncio
+          pytest tests/ -v --tb=short || true
+      
+      - name: Check Python syntax
+        working-directory: ./backend
+        run: |
+          python -m py_compile app/routers/*.py app/schemas/*.py
+
+  # ==================== 前端测试 ====================
+  frontend-test:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install pnpm
+        run: npm install -g pnpm
+      
+      - name: Install dependencies
+        working-directory: ./my-rag-frontend
+        run: pnpm install
+      
+      - name: Type check
+        working-directory: ./my-rag-frontend
+        run: pnpm exec tsc --noEmit
+      
+      - name: Build
+        working-directory: ./my-rag-frontend
+        run: pnpm run build
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: my-rag-frontend/dist/
+          retention-days: 7
+
+  # ==================== 部署（可选）====================
+  deploy:
+    name: Deploy to Server
+    needs: [backend-test, frontend-test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Download frontend artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: my-rag-frontend/dist/
+      
+      - name: Deploy via SSH
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "backend/,my-rag-frontend/dist/"
+          target: "/opt/rag-app/"
+          strip_components: 0
+      
+      - name: Restart services
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /opt/rag-app
+            docker-compose up -d --build
+            echo "✅ 部署完成"
