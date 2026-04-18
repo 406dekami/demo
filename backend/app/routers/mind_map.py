@@ -10,12 +10,14 @@ from ..schemas import mind_map as schemas
 from ..services import mind_map_service as service
 from ..services.graph_cache import get_graph_cache
 from ..services.graph_vector_service import get_graph_vector_service
+from ..utils.api_response import success_response, error_response
 from ..utils.chat import chat_with_llm
+from ..utils.token import verify_token
 
 router = APIRouter()
 
 
-@router.get("/tree", response_model=schemas.MindMapTreeResponse)
+@router.get("/tree")
 async def get_mind_map_tree(
     root_id: str = Query(default="root", description="根节点 ID")
 ):
@@ -29,14 +31,10 @@ async def get_mind_map_tree(
     if not tree:
         raise HTTPException(status_code=404, detail="根节点不存在")
     
-    return schemas.MindMapTreeResponse(
-        success=True,
-        data=tree,
-        message="success"
-    )
+    return success_response(tree)
 
 
-@router.get("/node/{node_id}", response_model=schemas.MindMapNodeResponse)
+@router.get("/node/{node_id}")
 async def get_node(node_id: str):
     """
     获取单个节点详情
@@ -48,14 +46,10 @@ async def get_node(node_id: str):
     if not node:
         raise HTTPException(status_code=404, detail="节点不存在")
     
-    return schemas.MindMapNodeResponse(
-        success=True,
-        data=node.to_dict(),
-        message="success"
-    )
+    return success_response(node.to_dict())
 
 
-@router.get("/node/{node_id}/children", response_model=schemas.MindMapNodeResponse)
+@router.get("/node/{node_id}/children")
 async def get_node_children(node_id: str):
     """
     获取节点的所有子节点
@@ -69,17 +63,13 @@ async def get_node_children(node_id: str):
     
     children = service.MindMapService.get_children(node_id)
     
-    return schemas.MindMapNodeResponse(
-        success=True,
-        data={
-            "node_id": node_id,
-            "children": children
-        },
-        message="success"
-    )
+    return success_response({
+        "node_id": node_id,
+        "children": children
+    })
 
 
-@router.get("/node/{node_id}/path", response_model=schemas.MindMapPathResponse)
+@router.get("/node/{node_id}/path")
 async def get_node_path(node_id: str):
     """
     获取从根节点到当前节点的路径
@@ -91,14 +81,10 @@ async def get_node_path(node_id: str):
     if not path:
         raise HTTPException(status_code=404, detail="节点不存在")
     
-    return schemas.MindMapPathResponse(
-        success=True,
-        data=path,
-        message="success"
-    )
+    return success_response(path)
 
 
-@router.get("/node/{node_id}/questions", response_model=schemas.MindMapQuestionsResponse)
+@router.get("/node/{node_id}/questions")
 async def get_node_questions(node_id: str):
     """
     获取节点的推荐问题
@@ -111,14 +97,10 @@ async def get_node_questions(node_id: str):
     
     questions = service.MindMapService.get_suggested_questions(node_id)
     
-    return schemas.MindMapQuestionsResponse(
-        success=True,
-        data=questions,
-        message="success"
-    )
+    return success_response(questions)
 
 
-@router.post("/node", response_model=schemas.MindMapNodeResponse)
+@router.post("/node")
 async def create_node(node_data: schemas.CreateNodeRequest):
     """
     创建新节点
@@ -130,14 +112,10 @@ async def create_node(node_data: schemas.CreateNodeRequest):
     if not node:
         raise HTTPException(status_code=500, detail="创建节点失败")
     
-    return schemas.MindMapNodeResponse(
-        success=True,
-        data=node.to_dict(),
-        message="节点创建成功"
-    )
+    return success_response(node.to_dict(), "节点创建成功")
 
 
-@router.put("/node/{node_id}", response_model=schemas.MindMapNodeResponse)
+@router.put("/node/{node_id}")
 async def update_node(node_id: str, node_data: schemas.UpdateNodeRequest):
     """
     更新节点信息
@@ -159,14 +137,10 @@ async def update_node(node_id: str, node_data: schemas.UpdateNodeRequest):
     # 返回更新后的节点
     updated_node = service.MindMapService.get_node(node_id)
     
-    return schemas.MindMapNodeResponse(
-        success=True,
-        data=updated_node.to_dict(),
-        message="节点更新成功"
-    )
+    return success_response(updated_node.to_dict(), "节点更新成功")
 
 
-@router.delete("/node/{node_id}", response_model=schemas.MindMapNodeResponse)
+@router.delete("/node/{node_id}")
 async def delete_node(
     node_id: str,
     cascade: bool = Query(default=False, description="是否级联删除子节点")
@@ -188,14 +162,10 @@ async def delete_node(
     if not success:
         raise HTTPException(status_code=500, detail="删除节点失败")
     
-    return schemas.MindMapNodeResponse(
-        success=True,
-        data={"node_id": node_id},
-        message="节点删除成功"
-    )
+    return success_response({"node_id": node_id}, "节点删除成功")
 
 
-@router.get("/search", response_model=schemas.MindMapNodeResponse)
+@router.get("/search")
 async def search_nodes(
     keyword: str = Query(..., description="搜索关键词"),
     limit: int = Query(default=20, description="返回结果数量")
@@ -218,15 +188,11 @@ async def search_nodes(
                 d['similarity'] = res['similarity']
                 nodes_data.append(d)
         
-        return schemas.MindMapNodeResponse(
-            success=True,
-            data={
-                "keyword": keyword,
-                "count": len(nodes_data),
-                "nodes": nodes_data
-            },
-            message="搜索完成"
-        )
+        return success_response({
+            "keyword": keyword,
+            "count": len(nodes_data),
+            "nodes": nodes_data
+        }, "搜索完成")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"搜索失败：{str(e)}")
 
@@ -238,7 +204,7 @@ async def vectorize_all_nodes():
     try:
         vector_service = get_graph_vector_service()
         result = vector_service.index_all_nodes(kb_id="mind_map_vectors")
-        return {"success": True, "result": result}
+        return success_response(result, "向量化完成")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -251,7 +217,7 @@ async def clear_cache():
         cache = get_graph_cache()
         if cache and cache._is_available():
             cache.clear_all_cache()
-            return {"message": "缓存已清空"}
+            return success_response(None, "缓存已清空")
         else:
             raise HTTPException(status_code=503, detail="Redis 服务不可用")
     except HTTPException:
@@ -262,17 +228,16 @@ async def clear_cache():
 
 # ==================== 学习进度 API ====================
 
-@router.get("/progress", summary="获取用户学习进度")
+@router.get("/progress", summary="获取用户学习进度", tags=["思维导图"])
 async def get_user_progress(request: Request):
     """获取当前用户的所有已完成节点 ID（只统计叶子节点）"""
     token = request.headers.get("Authorization", "").replace("Bearer ", "")
     if not token:
-        return {"success": True, "data": {"completed_ids": [], "total_nodes": 0, "completed_count": 0}, "message": "未登录，无进度数据"}
+        raise HTTPException(status_code=401, detail="未登录")
     
-    from ..utils.token import verify_token
     user_id = verify_token(token)
     if not user_id:
-        return {"success": True, "data": {"completed_ids": [], "total_nodes": 0, "completed_count": 0}, "message": "token 无效"}
+        return error_response("token 无效", code=401)
     
     try:
         progress_records = UserNodeProgress.select().where(
@@ -289,30 +254,25 @@ async def get_user_progress(request: Request):
         leaf_ids = {node.id for node in leaf_nodes}
         completed_leaf_count = len([cid for cid in completed_ids if cid in leaf_ids])
         
-        return {
-            "success": True,
-            "data": {
-                "completed_ids": completed_ids,
-                "total_nodes": total_nodes,
-                "completed_count": completed_leaf_count
-            },
-            "message": "获取成功"
-        }
+        return success_response({
+            "completed_ids": completed_ids,
+            "total_nodes": total_nodes,
+            "completed_count": completed_leaf_count
+        }, "获取成功")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/progress/toggle", summary="切换节点完成状态")
+@router.post("/progress/toggle", summary="切换节点完成状态", tags=["思维导图"])
 async def toggle_node_progress(data: dict, request: Request):
     """切换单个节点的完成状态，支持级联逻辑"""
     token = request.headers.get("Authorization", "").replace("Bearer ", "")
     if not token:
-        return {"success": False, "message": "未登录"}
+        raise HTTPException(status_code=401, detail="未登录")
     
-    from ..utils.token import verify_token
     user_id = verify_token(token)
     if not user_id:
-        return {"success": False, "message": "token 无效"}
+        return error_response("token 无效", code=401)
     
     node_id = data.get("node_id")
     is_completed = data.get("is_completed", False)
@@ -373,26 +333,21 @@ async def toggle_node_progress(data: dict, request: Request):
                     (UserNodeProgress.node_id.in_(descendants))
                 ).execute()
         
-        return {
-            "success": True,
-            "data": {"node_id": node_id, "is_completed": is_completed},
-            "message": "更新成功"
-        }
+        return success_response({"node_id": node_id, "is_completed": is_completed}, "更新成功")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/progress/batch-sync", summary="批量同步进度")
+@router.post("/progress/batch-sync", summary="批量同步进度", tags=["思维导图"])
 async def batch_sync_progress(data: dict, request: Request):
     """批量同步进度（从 localStorage 迁移到后端）"""
     token = request.headers.get("Authorization", "").replace("Bearer ", "")
     if not token:
-        return {"success": False, "message": "未登录"}
+        raise HTTPException(status_code=401, detail="未登录")
     
-    from ..utils.token import verify_token
     user_id = verify_token(token)
     if not user_id:
-        return {"success": False, "message": "token 无效"}
+        return error_response("token 无效", code=401)
     
     node_ids = data.get("node_ids", [])
     if not isinstance(node_ids, list):
@@ -415,42 +370,33 @@ async def batch_sync_progress(data: dict, request: Request):
                 progress.is_completed = True
                 progress.save()
         
-        return {
-            "success": True,
-            "data": {"synced_count": len(node_ids)},
-            "message": f"已同步 {len(node_ids)} 个节点"
-        }
+        return success_response({"synced_count": len(node_ids)}, f"已同步 {len(node_ids)} 个节点")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/progress/reset", summary="重置学习进度")
+@router.post("/progress/reset", summary="重置学习进度", tags=["思维导图"])
 async def reset_progress(request: Request):
     """重置当前用户的所有学习进度"""
     token = request.headers.get("Authorization", "").replace("Bearer ", "")
     if not token:
-        return {"success": False, "message": "未登录"}
+        raise HTTPException(status_code=401, detail="未登录")
     
-    from ..utils.token import verify_token
     user_id = verify_token(token)
     if not user_id:
-        return {"success": False, "message": "token 无效"}
+        return error_response("token 无效", code=401)
     
     try:
         deleted = UserNodeProgress.delete().where(
             UserNodeProgress.user_id == user_id
         ).execute()
         
-        return {
-            "success": True,
-            "data": {"deleted_count": deleted},
-            "message": "进度已重置"
-        }
+        return success_response({"deleted_count": deleted}, "进度已重置")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/chat", response_model=schemas.MindMapChatResponse)
+@router.post("/chat")
 async def chat_with_node(data: schemas.ChatRequest):
     """
     与节点对话
@@ -508,23 +454,19 @@ async def chat_with_node(data: schemas.ChatRequest):
             conversation_id=data.conversation_id
         )
         
-        return schemas.MindMapChatResponse(
-            success=True,
-            data={
-                "answer": answer["answer"],
-                "conversation_id": answer["conversation_id"],
-                "references": answer.get("references", [])
-            },
-            message="回答成功"
-        )
+        return success_response({
+            "answer": answer["answer"],
+            "conversation_id": answer["conversation_id"],
+            "references": answer.get("references", [])
+        }, "回答成功")
     except Exception as e:
         # 如果 LLM 调用失败，返回友好的错误信息
-        return schemas.MindMapChatResponse(
-            success=False,
-            data={
+        return {
+            "code": 500,
+            "message": "LLM 服务不可用",
+            "data": {
                 "answer": f"抱歉，暂时无法回答这个问题。错误信息：{str(e)}",
                 "conversation_id": data.conversation_id or "",
                 "references": []
-            },
-            message="LLM 服务不可用"
-        )
+            }
+        }

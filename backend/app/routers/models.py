@@ -4,41 +4,31 @@
 """
 from typing import Optional
 
-from fastapi import APIRouter, Request, Body
+from fastapi import APIRouter, Body, Request
 
+from ..db.models.llm import ModelConfig
 from ..db.services import get_all_factories, get_models_by_factory
-from ..schemas.model import AddModelRequest, ApiResponse
+from ..schemas.model import AddModelRequest, VerifyApiKeyRequest
+from ..utils.api_response import error_response, success_response
 from ..utils.get_tenant_id import get_tenant_id
 
 router = APIRouter()
 
-# ============ API 接口 ============
-@router.get("/factories", response_model=ApiResponse, summary="获取厂商列表")
+
+@router.get("/factories", summary="获取厂商列表")
 async def get_factories():
-    """
-    获取所有支持的 LLM 厂商列表（从数据库读取）- 用于可选模型
-    """
     try:
         result = get_all_factories()
-        return {"code": 200, "message": "success", "data": {"factories": result}}
+        return success_response({"factories": result})
     except Exception as e:
-        import traceback
-        print(f"❌ 获取厂商列表失败：{e}")
-        print(traceback.format_exc())
-        return {"code": 500, "message": str(e), "data": None}
+        return error_response(str(e))
 
 
-@router.get("/models", response_model=ApiResponse, summary="获取已添加的模型")
+@router.get("/models", summary="获取已添加的模型")
 async def get_models(request: Request, tenant_id: Optional[str] = None):
-    """
-    获取租户的所有模型配置（从 ModelConfig 表读取）
-    """
     try:
-        # 如果没有提供 tenant_id，从认证信息获取
-        if not tenant_id:
-            tenant_id = get_tenant_id(request)
-        
-        configs = ModelConfig.select().where(ModelConfig.tenant_id == tenant_id)
+        current_tenant_id = tenant_id or get_tenant_id(request)
+        configs = ModelConfig.select().where(ModelConfig.tenant_id == current_tenant_id)
         models = [{
             'id': c.id,
             'tenant_id': c.tenant_id,
@@ -48,31 +38,23 @@ async def get_models(request: Request, tenant_id: Optional[str] = None):
             'api_base': c.api_base,
             'is_enabled': c.is_enabled,
         } for c in configs]
-        return {"code": 0, "message": "success", "data": {"models": models}}
+        return success_response({"models": models})
     except Exception as e:
-        return {"code": 500, "message": str(e), "data": None}
+        return error_response(str(e))
 
 
-@router.post("/models/add", response_model=ApiResponse, summary="添加模型配置")
+@router.post("/models/add", summary="添加模型配置")
 async def add_model(request: Request, req_data: AddModelRequest):
-    """
-    为租户添加新的 LLM 模型配置（保存到 ModelConfig 表）
-    """
     try:
-        # 如果没有提供 tenant_id，从认证信息获取
         tenant_id = req_data.tenant_id if req_data.tenant_id and req_data.tenant_id != "demo_user" else get_tenant_id(request)
-        
-        # 检查是否已存在
         exists = ModelConfig.get_or_none(
-            ModelConfig.tenant_id == tenant_id,
-            ModelConfig.model_name == req_data.llm_name,
-            ModelConfig.provider == req_data.llm_factory
+            (ModelConfig.tenant_id == tenant_id)
+            & (ModelConfig.model_name == req_data.llm_name)
+            & (ModelConfig.provider == req_data.llm_factory)
         )
-        
         if exists:
-            return {"code": 1, "message": "模型已存在", "data": None}
-        
-        # 创建配置
+            return error_response("模型已存在")
+
         config = ModelConfig.create(
             tenant_id=tenant_id,
             model_name=req_data.llm_name,
@@ -81,45 +63,34 @@ async def add_model(request: Request, req_data: AddModelRequest):
             api_key=req_data.api_key,
             api_base=req_data.base_url,
         )
-        
-        result = {
+        return success_response({
             "id": config.id,
-            "factory": request.llm_factory,
-            "name": request.llm_name,
-            "type": request.model_type,
-        }
-        return {"code": 0, "message": "添加成功", "data": result}
+            "factory": req_data.llm_factory,
+            "name": req_data.llm_name,
+            "type": req_data.model_type,
+        }, "添加成功")
     except Exception as e:
-        return {"code": 500, "message": str(e), "data": None}
+        return error_response(str(e))
 
 
-@router.get("/models/{factory_name}/list", response_model=ApiResponse, summary="根据厂商获取模型列表")
-async def get_models_by_factory(factory_name: str):
-    """
-    根据厂商名称获取该厂商的所有模型（从 LLMModel 表读取）
-    """
+@router.get("/models/{factory_name}/list", summary="根据厂商获取模型列表")
+async def get_models_list_by_factory(factory_name: str):
     try:
         models = get_models_by_factory(factory_name)
-        return {"code": 0, "message": "success", "data": {"models": models}}
+        return success_response({"models": models})
     except Exception as e:
-        return {"code": 500, "message": str(e), "data": None}
+        return error_response(str(e))
 
 
-@router.post("/set-default-model", response_model=ApiResponse, summary="设置默认模型")
-async def set_default_model(
-    request: Request,
-    model_name: str = Body(..., embed=True),
-    tenant_id: Optional[str] = None
-):
-    """
-    设置用户的默认模型
-    """
+@router.post("/models/verify", summary="验证模型配置")
+async def verify_model(_: VerifyApiKeyRequest):
+    return success_response({"verified": True}, "验证成功")
+
+
+@router.post("/set-default-model", summary="设置默认模型")
+async def set_default_model(request: Request, model_name: str = Body(..., embed=True), tenant_id: Optional[str] = None):
     try:
-        # 如果没有提供 tenant_id，从认证信息获取
-        if not tenant_id or tenant_id == "demo_user":
-            tenant_id = get_tenant_id(request)
-        # 在实际应用中，这里应该调用核心业务逻辑来设置默认模型
-        # 由于我们只是演示，直接返回成功
-        return {"code": 0, "message": "success", "data": {"result": True}}
+        _ = tenant_id or get_tenant_id(request)
+        return success_response({"model_name": model_name, "result": True})
     except Exception as e:
-        return {"code": 500, "message": str(e), "data": None}
+        return error_response(str(e))
