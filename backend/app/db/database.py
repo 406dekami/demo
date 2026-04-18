@@ -4,15 +4,19 @@
 """
 import os
 import logging
+from pathlib import Path
 from peewee import SqliteDatabase
 from playhouse.pool import PooledSqliteDatabase
 
+# 导入配置
+from ..core.config import settings
+
 # ==================== 数据库配置 ====================
 # 开发用 SQLite，生产改 MySQL
-DB_PATH = os.path.join(
-    os.path.dirname(__file__),  # app/db/
-    '..', '..', 'storage', 'sqlite', 'demo.db'  # ../../storage/sqlite/demo.db
-)
+DB_PATH = str(settings.DB_PATH)
+
+# 确保数据库目录存在
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 # 使用连接池优化性能
 # max_connections: 最大连接数

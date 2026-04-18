@@ -44,12 +44,17 @@ class Settings:
     BASE_DIR = Path(__file__).parent.parent.parent
     CONF_DIR = BASE_DIR / "conf"
     DATA_DIR = BASE_DIR / "data"
+    STORAGE_DIR = BASE_DIR / "storage"
+    SQLITE_DIR = STORAGE_DIR / "sqlite"
     LOGS_DIR = BASE_DIR / "logs"
     AVATAR_DIR = DATA_DIR / "avatars"
 
     # 确保目录存在
-    for directory in [DATA_DIR, LOGS_DIR, AVATAR_DIR]:
+    for directory in [DATA_DIR, STORAGE_DIR, SQLITE_DIR, LOGS_DIR, AVATAR_DIR]:
         directory.mkdir(parents=True, exist_ok=True)
+
+    # 数据库路径
+    DB_PATH = SQLITE_DIR / "demo.db"
 
 
 # 全局配置实例
