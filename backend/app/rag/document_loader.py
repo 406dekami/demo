@@ -205,9 +205,39 @@ class DocumentLoader:
             except Exception as e:
                 logging.warning(f"COM 接口解析失败：{e}")
             
-            # 方案 2：尝试 antiword 或 catdoc（Linux/Mac）
+            # 方案 2：尝试 macOS textutil（macOS 自带工具）
             import subprocess
             
+            try:
+                import tempfile
+                temp_docx = tempfile.mktemp(suffix=".docx")
+                result = subprocess.run(
+                    ['textutil', '-convert', 'docx', '-output', temp_docx, file_path],
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                if result.returncode == 0 and os.path.exists(temp_docx):
+                    # 用 python-docx 解析转换后的文件
+                    temp_doc = DocxDocument(temp_docx)
+                    text = ""
+                    for paragraph in temp_doc.paragraphs:
+                        text += paragraph.text + "\n"
+                    
+                    # 清理临时文件
+                    os.remove(temp_docx)
+                    
+                    if text.strip():
+                        content.append({
+                            "text": text,
+                            "source": os.path.basename(file_path)
+                        })
+                        logging.info(f"textutil 转换解析成功，提取文本长度：{len(text)}")
+                        return content
+            except (FileNotFoundError, subprocess.TimeoutExpired):
+                pass
+            
+            # 方案 3：尝试 antiword 或 catdoc（Linux/Mac）
             try:
                 result = subprocess.run(
                     ['antiword', file_path],
@@ -275,9 +305,9 @@ class DocumentLoader:
                 error_msg = (
                     f"无法解析 .doc 文件：{os.path.basename(file_path)}\n"
                     f"建议：\n"
-                    f"1. 在 Windows 上安装 pywin32：pip install pywin32\n"
-                    f"2. 或者将 .doc 文件转换为 .docx 或 .pdf 后重新上传\n"
-                    f"3. Linux 环境需安装 antiword：sudo apt-get install antiword"
+                    f"1. 将 .doc 文件转换为 .docx 或 .pdf 后重新上传（推荐）\n"
+                    f"2. 在 Windows 上安装 pywin32：pip install pywin32\n"
+                    f"3. Linux 环境安装 antiword：sudo apt-get install antiword"
                 )
                 logging.error(error_msg)
                 raise ValueError(error_msg)

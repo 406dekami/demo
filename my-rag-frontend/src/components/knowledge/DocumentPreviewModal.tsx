@@ -31,8 +31,26 @@ export default function DocumentPreviewModal({ kbId, docId, docName, fileType, o
   const downloadUrl = getDocumentDownloadUrl(kbId, docId)
   const [previewError, setPreviewError] = useState<string | null>(null)
   const [docxLoading, setDocxLoading] = useState(false)
+  const [pdfLoading, setPdfLoading] = useState(true)
 
   const docxContainerRef = useRef<HTMLDivElement>(null)
+  const pdfLoadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // 重置 PDF 加载状态
+  useEffect(() => {
+    if (activeTab === 'preview' && isPdf) {
+      setPdfLoading(true)
+      setPreviewError(null)
+      // 5秒超时兜底
+      if (pdfLoadTimerRef.current) clearTimeout(pdfLoadTimerRef.current)
+      pdfLoadTimerRef.current = setTimeout(() => {
+        setPdfLoading(false)
+      }, 5000)
+    }
+    return () => {
+      if (pdfLoadTimerRef.current) clearTimeout(pdfLoadTimerRef.current)
+    }
+  }, [activeTab, isPdf, previewUrl])
 
   // DOCX 预览渲染
   useEffect(() => {
@@ -152,7 +170,11 @@ export default function DocumentPreviewModal({ kbId, docId, docName, fileType, o
             <div className="h-full">
               {/* PDF: iframe */}
               {isPdf && (
-                previewError ? (
+                pdfLoading ? (
+                  <div className="flex h-full items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
+                  </div>
+                ) : previewError ? (
                   <div className="flex h-full flex-col items-center justify-center p-8 text-center">
                     <FileText className={`mb-4 h-16 w-16 ${isDark ? 'text-slate-600' : 'text-slate-300'}`} />
                     <p className={`mb-2 text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{previewError}</p>
@@ -171,6 +193,10 @@ export default function DocumentPreviewModal({ kbId, docId, docName, fileType, o
                     src={previewUrl}
                     className="h-full w-full border-0"
                     title="文档预览"
+                    onError={() => {
+                      setPdfLoading(false)
+                      setPreviewError('PDF 加载失败')
+                    }}
                   />
                 )
               )}

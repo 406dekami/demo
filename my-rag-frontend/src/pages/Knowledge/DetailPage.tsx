@@ -48,16 +48,18 @@ export const KnowledgeDetailPage: FC<Props> = ({ bases, onAddBase }) => {
     if (!id) return
     try {
       const result = await getKnowledgeBaseDocuments(id)
-      setDocuments(result.map((doc: any) => ({
-        id: doc.id,
-        name: doc.name,
-        fileType: doc.file_type,
-        status: doc.parse_status === 'pending' ? 'processing' : doc.parse_status,
-        chunkCount: doc.chunk_count,
-        uploadTime: new Date(doc.create_time || Date.now()).toISOString(),
-        fileSize: doc.file_size,
-        message: doc.parse_msg,
-      })))
+      setDocuments(result
+        .filter((doc: any) => doc.parse_status !== 'failed')
+        .map((doc: any) => ({
+          id: doc.id,
+          name: doc.name,
+          fileType: doc.file_type,
+          status: doc.parse_status === 'pending' ? 'processing' : doc.parse_status,
+          chunkCount: doc.chunk_count,
+          uploadTime: new Date(doc.create_time || Date.now()).toISOString(),
+          fileSize: doc.file_size,
+          message: doc.parse_msg,
+        })))
     } catch (error) {
       console.error('加载文档列表失败:', error)
     }

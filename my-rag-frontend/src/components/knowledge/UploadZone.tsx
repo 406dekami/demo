@@ -62,16 +62,19 @@ export default function UploadZone({ kbId, disabled = false }: UploadZoneProps) 
           // 成功后自动移除进度项
           setTimeout(() => removeUploadingFile(uploadFile.id), 1000)
 
+          // 获取最新文档列表，只保留成功解析的文档
           const docs = await getKnowledgeBaseDocuments(kbId)
-          setDocuments(docs.map((doc: any) => ({
-            id: doc.id,
-            name: doc.name,
-            status: doc.parse_status === 'pending' ? 'processing' : doc.parse_status,
-            chunkCount: doc.chunk_count,
-            uploadTime: new Date(doc.create_time || Date.now()).toISOString(),
-            fileSize: doc.file_size,
-            message: doc.parse_msg,
-          })))
+          setDocuments(docs
+            .filter((doc: any) => doc.parse_status !== 'failed')
+            .map((doc: any) => ({
+              id: doc.id,
+              name: doc.name,
+              status: doc.parse_status === 'pending' ? 'processing' : doc.parse_status,
+              chunkCount: doc.chunk_count,
+              uploadTime: new Date(doc.create_time || Date.now()).toISOString(),
+              fileSize: doc.file_size,
+              message: doc.parse_msg,
+            })))
         } catch (error) {
           console.error('上传处理失败:', error)
           updateUploadingFile(uploadFile.id, { status: 'failed', message: error instanceof Error ? error.message : '处理失败' })
