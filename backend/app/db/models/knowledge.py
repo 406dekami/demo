@@ -3,6 +3,7 @@
 知识库相关模型
 """
 from peewee import CharField, TextField, IntegerField, FloatField
+
 from .base import BaseModel
 
 
@@ -15,6 +16,8 @@ class KnowledgeBase(BaseModel):
     chunk_size = IntegerField(default=512, help_text="切片长度")
     chunk_overlap = IntegerField(default=50, help_text="切片重叠")
     parser_type = CharField(max_length=32, default="naive", help_text="解析方式：naive/ocr/table")
+    cover_image = TextField(null=True, help_text="封面图片 URL（Base64）")
+    cover_color = CharField(max_length=16, null=True, help_text="封面纯色（hex）")
 
     class Meta:
         table_name = "knowledgebase"

@@ -1,9 +1,9 @@
 // KnowledgeCard.tsx
-import { type FC, useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import type { KnowledgeBase, Notebook } from '@/types'
-import { NotebookCover } from './NotebookCover'
-import { Trash2, FileText, File, FileSpreadsheet, FileCode } from 'lucide-react'
+import {type FC, useEffect, useState} from 'react'
+import {useNavigate} from 'react-router-dom'
+import type {KnowledgeBase, Notebook} from '@/types'
+import {NotebookCover} from './NotebookCover'
+import {File, FileCode, FileSpreadsheet, FileText, Trash2} from 'lucide-react'
 
 interface Props {
   base: KnowledgeBase
@@ -35,7 +35,7 @@ export const KnowledgeCard: FC<Props> = ({ base, preview, onDelete }) => {
       tabIndex={0}
       onClick={() => navigate(`/knowledge/${base.id}`)}
       onKeyDown={(e) => e.key === 'Enter' && navigate(`/knowledge/${base.id}`)}
-      className={`group flex min-h-[280px] cursor-pointer flex-col overflow-hidden rounded-[28px] text-left transition duration-300 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isDark ? 'border-slate-800/80 bg-slate-950/55 shadow-[0_20px_80px_rgba(2,6,23,.45)] hover:border-sky-400/35 hover:bg-slate-900/70 hover:shadow-[0_24px_90px_rgba(14,165,233,.12)] focus:ring-sky-400/40 focus:ring-offset-slate-950' : 'border-blue-200/60 bg-white/70 shadow-lg hover:border-blue-400 hover:bg-white/90 hover:shadow-xl focus:ring-blue-400/40 focus:ring-offset-white'}`}
+      className={`group flex w-full min-h-[280px] cursor-pointer flex-col overflow-hidden rounded-[28px] text-left transition duration-300 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isDark ? 'border-slate-800/80 bg-slate-950/55 shadow-[0_20px_80px_rgba(2,6,23,.45)] hover:border-sky-400/35 hover:bg-slate-900/70 hover:shadow-[0_24px_90px_rgba(14,165,233,.12)] focus:ring-sky-400/40 focus:ring-offset-slate-950' : 'border-blue-200/60 bg-white/70 shadow-lg hover:border-blue-400 hover:bg-white/90 hover:shadow-xl focus:ring-blue-400/40 focus:ring-offset-white'}`}
     >
       <NotebookCover notebook={preview} />
 

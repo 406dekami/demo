@@ -2,8 +2,8 @@
  * 模型验证相关的自定义 Hook
  */
 
-import { useState } from 'react'
-import axios from 'axios'
+import {useState} from 'react'
+import apiClient from '@/api/client'
 
 export interface VerifyModelParams {
   tenant_id?: string
@@ -17,59 +17,43 @@ export interface VerifyResult {
   message: string
 }
 
-/**
- * 模型验证 Hook
- * @returns 验证状态、验证函数和错误信息
- */
 export const useModelVerify = () => {
   const [verifying, setVerifying] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  /**
-   * 验证模型 API Key 和配置
-   */
   const verifyModel = async (params: VerifyModelParams): Promise<VerifyResult> => {
     setVerifying(true)
     setError(null)
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/model/models/verify', params)
+      const response = await apiClient.post<{ code: number; message: string; data?: { verified?: boolean } }>(
+        '/model/models/verify',
+        params,
+      )
 
       if (response.data.code === 0) {
         return {
           success: true,
-          message: response.data.message || '验证成功！'
-        }
-      } else {
-        return {
-          success: false,
-          message: response.data.message || '验证失败'
+          message: response.data.message || '验证成功！',
         }
       }
-    } catch (err: any) {
-      let errorMsg = '验证失败，请检查 API Key 和网络连接'
-      
-      if (err.response) {
-        errorMsg = err.response.data?.message || `API 错误：${err.response.status}`
-      } else if (err.request) {
-        errorMsg = '网络连接失败，请检查网络'
-      } else if (err.message) {
-        errorMsg = err.message
+
+      return {
+        success: false,
+        message: response.data.message || '验证失败',
       }
-      
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : '验证失败，请检查 API Key 和网络连接'
       setError(errorMsg)
       return {
         success: false,
-        message: errorMsg
+        message: errorMsg,
       }
     } finally {
       setVerifying(false)
     }
   }
 
-  /**
-   * 清除错误信息
-   */
   const clearError = () => {
     setError(null)
   }
@@ -78,6 +62,6 @@ export const useModelVerify = () => {
     verifying,
     error,
     verifyModel,
-    clearError
+    clearError,
   }
 }

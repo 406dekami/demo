@@ -2,11 +2,13 @@
 文档加载与解析模块
 支持多种格式的文档加载和解析
 """
-import os
 import logging
+import os
 from typing import List, Dict, Any
+
 import pdfplumber
 from docx import Document as DocxDocument
+
 
 class DocumentLoader:
     """
@@ -130,14 +132,51 @@ class DocumentLoader:
         """
         解析旧版 Word 文档（.doc）
         注意：.doc 是二进制格式，需要使用专用库或转换工具
-        这里提供简单的文本提取（可能不完整）
         """
         content = []
         try:
-            # 尝试使用 antiword 或 catdoc（需要系统安装）
+            # 方案 1：使用 pywin32 COM 接口（Windows 环境，最可靠）
+            try:
+                import win32com.client
+                import tempfile
+                
+                logging.info("使用 COM 接口解析 .doc 文件...")
+                word = win32com.client.Dispatch("Word.Application")
+                word.Visible = False
+                
+                # 打开 .doc 文件
+                doc = word.Documents.Open(os.path.abspath(file_path))
+                
+                # 另存为 .docx 临时文件
+                temp_docx = tempfile.mktemp(suffix=".docx")
+                doc.SaveAs2(temp_docx, FileFormat=16)  # 16 = docx format
+                doc.Close()
+                word.Quit()
+                
+                # 用 python-docx 解析临时文件
+                temp_doc = DocxDocument(temp_docx)
+                text = ""
+                for paragraph in temp_doc.paragraphs:
+                    text += paragraph.text + "\n"
+                
+                # 清理临时文件
+                os.remove(temp_docx)
+                
+                if text and text.strip():
+                    content.append({
+                        "text": text,
+                        "source": os.path.basename(file_path)
+                    })
+                    logging.info(f"COM 接口解析成功，提取文本长度：{len(text)}")
+                    return content
+            except ImportError:
+                logging.info("pywin32 未安装，跳过 COM 接口解析")
+            except Exception as e:
+                logging.warning(f"COM 接口解析失败：{e}")
+            
+            # 方案 2：尝试 antiword 或 catdoc（Linux/Mac）
             import subprocess
             
-            # 优先尝试 antiword
             try:
                 result = subprocess.run(
                     ['antiword', file_path],
@@ -154,7 +193,6 @@ class DocumentLoader:
             except (FileNotFoundError, subprocess.TimeoutExpired):
                 pass
             
-            # 尝试 catdoc
             try:
                 result = subprocess.run(
                     ['catdoc', file_path],
@@ -171,19 +209,17 @@ class DocumentLoader:
             except (FileNotFoundError, subprocess.TimeoutExpired):
                 pass
             
-            # 备用方案：使用 olefile 读取（纯 Python 实现）
+            # 方案 3：使用 olefile（纯 Python，效果有限）
             try:
                 import olefile
                 ole = olefile.OleFileIO(file_path)
                 text_streams = []
                 
-                # 读取文本流
                 for stream in ole.listdir():
                     if 'WordDocument' in stream or '1Table' in stream:
                         continue
                     try:
                         data = ole.openstream(stream).read()
-                        # 尝试解码
                         try:
                             text = data.decode('utf-8', errors='ignore')
                             if text.strip():
@@ -203,19 +239,17 @@ class DocumentLoader:
             except Exception as e:
                 logging.warning(f"olefile 解析失败：{e}")
             
-            # 最后的备用方案：直接读取文本（效果有限）
+            # 如果所有方案都失败，给出明确提示
             if not content:
-                logging.info(f"尝试直接读取 DOC 文件...")
-                with open(file_path, 'rb') as f:
-                    data = f.read()
-                    # 尝试提取 ASCII 文本
-                    text = ''.join(chr(b) if 32 <= b < 127 else ' ' for b in data)
-                    text = ' '.join(text.split())  # 清理空白字符
-                    if text.strip():
-                        content.append({
-                            "text": text,
-                            "source": os.path.basename(file_path)
-                        })
+                error_msg = (
+                    f"无法解析 .doc 文件：{os.path.basename(file_path)}\n"
+                    f"建议：\n"
+                    f"1. 在 Windows 上安装 pywin32：pip install pywin32\n"
+                    f"2. 或者将 .doc 文件转换为 .docx 或 .pdf 后重新上传\n"
+                    f"3. Linux 环境需安装 antiword：sudo apt-get install antiword"
+                )
+                logging.error(error_msg)
+                raise ValueError(error_msg)
                         
         except Exception as e:
             logging.error(f"解析 DOC 文件失败 {file_path}: {e}")

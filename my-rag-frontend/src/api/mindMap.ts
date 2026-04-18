@@ -2,12 +2,7 @@
  * 思维导图 API
  */
 import apiClient from './client'
-
-interface ApiResponse<T = unknown> {
-  success: boolean
-  data?: T
-  message: string
-}
+import type { ApiResponse } from '../types'
 
 export interface MindMapNode {
   id: string
@@ -25,17 +20,9 @@ export interface MindMapNode {
   children?: MindMapNode[]
 }
 
-export interface MindMapTreeResponse {
-  success: boolean
-  data: MindMapNode | null
-  message: string
-}
+export interface MindMapTreeResponse extends ApiResponse<MindMapNode | null> {}
 
-export interface QuestionsResponse {
-  success: boolean
-  data: string[]
-  message: string
-}
+export interface QuestionsResponse extends ApiResponse<string[]> {}
 
 export interface ChatRequest {
   node_id: string
@@ -43,15 +30,11 @@ export interface ChatRequest {
   conversation_id?: string
 }
 
-export interface ChatResponse {
-  success: boolean
-  data: {
-    answer: string
-    conversation_id: string
-    references?: string[]
-  }
-  message: string
-}
+export interface ChatResponse extends ApiResponse<{
+  answer: string
+  conversation_id: string
+  references?: string[]
+}> {}
 
 /**
  * 获取完整的思维导图树
@@ -62,7 +45,7 @@ export const getMindMapTree = async (rootId: string = 'root'): Promise<MindMapNo
       `/mind-map/tree?root_id=${rootId}`
     )
     console.log('API 原始响应:', response.data)
-    if (response.data.success && response.data.data) {
+    if (response.data.code === 0 && response.data.data) {
       console.log('返回的树形数据:', response.data.data)
       console.log('根节点的子节点:', response.data.data.children)
       if (response.data.data.children && response.data.data.children.length > 0) {
@@ -86,7 +69,7 @@ export const getNode = async (nodeId: string): Promise<MindMapNode | null> => {
     const response = await apiClient.get<ApiResponse<MindMapNode>>(
       `/mind-map/node/${nodeId}`
     )
-    if (response.data.success && response.data.data) {
+    if (response.data.code === 0 && response.data.data) {
       return response.data.data
     }
     return null
@@ -104,7 +87,7 @@ export const getNodeChildren = async (nodeId: string): Promise<MindMapNode[]> =>
     const response = await apiClient.get<ApiResponse<{ node_id: string; children: MindMapNode[] }>>(
       `/mind-map/node/${nodeId}/children`
     )
-    if (response.data.success && response.data.data) {
+    if (response.data.code === 0 && response.data.data) {
       return response.data.data.children || []
     }
     return []
@@ -122,7 +105,7 @@ export const getNodePath = async (nodeId: string): Promise<MindMapNode[]> => {
     const response = await apiClient.get<ApiResponse<MindMapNode[]>>(
       `/mind-map/node/${nodeId}/path`
     )
-    if (response.data.success && response.data.data) {
+    if (response.data.code === 0 && response.data.data) {
       return response.data.data
     }
     return []
@@ -140,7 +123,7 @@ export const getNodeQuestions = async (nodeId: string): Promise<string[]> => {
     const response = await apiClient.get<ApiResponse<string[]>>(
       `/mind-map/node/${nodeId}/questions`
     )
-    if (response.data.success && response.data.data) {
+    if (response.data.code === 0 && response.data.data) {
       return response.data.data
     }
     return []
@@ -158,7 +141,7 @@ export const searchNodes = async (keyword: string, limit: number = 20): Promise<
     const response = await apiClient.get<ApiResponse<{ keyword: string; count: number; nodes: MindMapNode[] }>>(
       `/mind-map/search?keyword=${keyword}&limit=${limit}`
     )
-    if (response.data.success && response.data.data) {
+    if (response.data.code === 0 && response.data.data) {
       return response.data.data.nodes || []
     }
     return []
@@ -177,7 +160,7 @@ export const createNode = async (nodeData: Partial<MindMapNode>): Promise<MindMa
       '/mind-map/node',
       nodeData
     )
-    if (response.data.success && response.data.data) {
+    if (response.data.code === 0 && response.data.data) {
       return response.data.data
     }
     return null
@@ -196,7 +179,7 @@ export const updateNode = async (nodeId: string, updates: Partial<MindMapNode>):
       `/mind-map/node/${nodeId}`,
       updates
     )
-    return response.data.success
+    return response.data.code === 0
   } catch (error) {
     console.error('更新节点失败:', error)
     throw error
@@ -211,7 +194,7 @@ export const deleteNode = async (nodeId: string, cascade: boolean = false): Prom
     const response = await apiClient.delete<ApiResponse<{ node_id: string }>>(
       `/mind-map/node/${nodeId}?cascade=${cascade}`
     )
-    return response.data.success
+    return response.data.code === 0
   } catch (error) {
     console.error('删除节点失败:', error)
     throw error
@@ -236,15 +219,11 @@ export const sendQuestion = async (data: ChatRequest): Promise<ChatResponse> => 
 
 // ==================== 学习进度 API ====================
 
-export interface UserProgressResponse {
-  success: boolean
-  data: {
-    completed_ids: string[]
-    total_nodes: number
-    completed_count: number
-  }
-  message: string
-}
+export interface UserProgressResponse extends ApiResponse<{
+  completed_ids: string[]
+  total_nodes: number
+  completed_count: number
+}> {}
 
 /**
  * 获取用户学习进度
@@ -254,7 +233,7 @@ export const getUserProgress = async (): Promise<UserProgressResponse['data']> =
     const response = await apiClient.get<UserProgressResponse>(
       '/mind-map/progress'
     )
-    if (response.data.success && response.data.data) {
+    if (response.data.code === 0 && response.data.data) {
       return response.data.data
     }
     return { completed_ids: [], total_nodes: 0, completed_count: 0 }
@@ -273,7 +252,7 @@ export const toggleNodeProgress = async (nodeId: string, isCompleted: boolean): 
       '/mind-map/progress/toggle',
       { node_id: nodeId, is_completed: isCompleted }
     )
-    return response.data.success
+    return response.data.code === 0
   } catch (error) {
     console.error('切换节点进度失败:', error)
     return false
@@ -289,7 +268,7 @@ export const batchSyncProgress = async (nodeIds: string[]): Promise<boolean> => 
       '/mind-map/progress/batch-sync',
       { node_ids: nodeIds }
     )
-    return response.data.success
+    return response.data.code === 0
   } catch (error) {
     console.error('批量同步进度失败:', error)
     return false
@@ -304,7 +283,7 @@ export const resetProgress = async (): Promise<boolean> => {
     const response = await apiClient.post<ApiResponse>(
       '/mind-map/progress/reset'
     )
-    return response.data.success
+    return response.data.code === 0
   } catch (error) {
     console.error('重置学习进度失败:', error)
     return false

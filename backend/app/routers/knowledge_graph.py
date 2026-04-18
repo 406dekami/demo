@@ -3,7 +3,7 @@
 知识图谱 API 路由
 独立于 Notebook/KnowledgeBase 系统
 """
-from typing import List, Dict, Any, Optional
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from loguru import logger
@@ -16,7 +16,7 @@ router = APIRouter(tags=["知识图谱"])
 
 # ==================== API 接口 ====================
 
-@router.get("/nodes", response_model=List[Dict[str, Any]])
+@router.get("/nodes")
 async def get_all_nodes():
     """
     获取所有知识节点
@@ -31,7 +31,7 @@ async def get_all_nodes():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/nodes/{node_id}", response_model=Dict[str, Any])
+@router.get("/nodes/{node_id}")
 async def get_node(node_id: str):
     """
     获取单个节点详情
@@ -185,7 +185,7 @@ async def create_relation(relation_data: RelationCreateSchema):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/relations", response_model=List[Dict[str, Any]])
+@router.get("/relations")
 async def get_relations(node_id: Optional[str] = Query(None, description="节点 ID，用于过滤关系")):
     """
     获取知识关系列表
@@ -229,7 +229,7 @@ async def delete_relation(relation_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/tree", response_model=Dict[str, Any])
+@router.get("/tree")
 async def get_tree(root_id: str = Query("N001", description="根节点 ID")):
     """
     获取知识树形结构
@@ -247,7 +247,7 @@ async def get_tree(root_id: str = Query("N001", description="根节点 ID")):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/visualization", response_model=Dict[str, Any])
+@router.get("/visualization")
 async def get_visualization():
     """
     获取 ECharts 可视化数据
@@ -265,7 +265,7 @@ async def get_visualization():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/path/{node_id}", response_model=List[Dict[str, Any]])
+@router.get("/path/{node_id}")
 async def get_node_path(
     node_id: str,
     root_id: str = Query("N001", description="根节点 ID")
@@ -310,7 +310,7 @@ async def vectorize_all_nodes():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/search", response_model=List[Dict[str, Any]])
+@router.get("/search")
 async def search_nodes(
     query: str = Query(..., description="搜索查询"),
     top_k: int = Query(5, ge=1, le=20, description="返回结果数量")

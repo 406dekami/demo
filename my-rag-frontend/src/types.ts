@@ -8,6 +8,8 @@ export interface KnowledgeBase {
   created_at?: string
   updated_at?: string
   file_types?: string[]  // 支持的文件类型列表
+  coverImage?: string  // 封面图片 URL
+  coverColor?: string  // 封面纯色（hex）
 }
 
 export interface Notebook {
@@ -17,6 +19,7 @@ export interface Notebook {
   pattern: 'dots' | 'waves' | 'tiles' | 'hearts' | 'rain' | 'triangles' | 'solid'
   lastUpdated: string | Date
   kb_ids?: string[]  // 关联的知识库 ID 列表
+  coverImage?: string  // 封面图片 URL（可选）
 }
 
 // 文档类型
@@ -59,4 +62,11 @@ export interface Conversation {
   title?: string
   messages: Message[]
   createdAt: string
+}
+
+// 统一 API 响应格式
+export interface ApiResponse<T = unknown> {
+  code: number
+  message: string
+  data?: T
 }

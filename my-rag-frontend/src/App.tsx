@@ -1,16 +1,17 @@
 // App.tsx
-import { useState, useEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import {useEffect, useState} from 'react'
+import {Navigate, Route, Routes} from 'react-router-dom'
 import './App.css'
-import { AuthPage } from '@/components/auth'
-import { HomePage } from '@/pages/home'
-import { KnowledgeDetailPage } from './pages/Knowledge/DetailPage'
-import { NotebookDetailPage } from './pages/Notebook/DetailPage'
-import { MindMapPage } from './pages/MindMap'
-import { SettingsPage } from './pages/SettingsPage'
-import { LandingPage } from './pages/LandingPage'
-import { MainLayout } from './layouts/MainLayout'
-import type { KnowledgeBase, Notebook } from './types'
+import {AuthPage} from '@/components/auth'
+import {HomePage} from '@/pages/home'
+import {KnowledgeDetailPage} from './pages/Knowledge/DetailPage'
+import {NotebookDetailPage} from './pages/Notebook/DetailPage'
+import {MindMapPage} from './pages/MindMap'
+import {SettingsPage} from './pages/SettingsPage'
+import {LandingPage} from './pages/LandingPage'
+import {MainLayout} from './layouts/MainLayout'
+import type {KnowledgeBase, Notebook} from './types'
+import {deleteKnowledgeBase, getKnowledgeBases, getNotebooks} from '@/api/knowledge'
 import toast from 'react-hot-toast'
 
 export default function App() {
@@ -22,8 +23,33 @@ export default function App() {
     return !!token
   }
 
+  // 加载知识库和笔记本数据
   useEffect(() => {
-    checkLoginStatus()
+    const loadData = async () => {
+      if (!checkLoginStatus()) return
+
+      try {
+        const [bases, notes] = await Promise.all([
+          getKnowledgeBases(),
+          getNotebooks()
+        ])
+        setKnowledgeBases(bases)
+        // 将 API 返回的 Notebook 转换为前端显示用的 Notebook
+        const displayNotebooks = notes.map(nb => ({
+          id: nb.id,
+          title: nb.title,
+          coverColor: '#fef3c7',
+          pattern: 'dots' as const,
+          lastUpdated: new Date(),
+          kb_ids: nb.kb_ids || [],
+        }))
+        setNotebooks(displayNotebooks)
+      } catch (error) {
+        console.error('加载数据失败:', error)
+      }
+    }
+
+    loadData()
   }, [])
 
   // 提取公共的 handlers
@@ -37,9 +63,16 @@ export default function App() {
     })
   }
 
-  const handleDeleteBase = (id: string) => {
+  const handleDeleteBase = async (id: string) => {
     if (confirm('确定要删除这个知识库吗？')) {
-      setKnowledgeBases(prev => prev.filter(b => b.id !== id))
+      try {
+        await deleteKnowledgeBase(id)
+        setKnowledgeBases(prev => prev.filter(b => b.id !== id))
+        toast.success('知识库已删除')
+      } catch (error) {
+        console.error('删除失败:', error)
+        toast.error('删除失败：' + (error instanceof Error ? error.message : '未知错误'))
+      }
     }
   }
 

@@ -1,11 +1,6 @@
 // NotebookCover.tsx
-import { type FC } from "react";
-import type { Notebook } from '../../types'
-
-const formatDate = (d: Date | string) => {
-  const date = typeof d === 'string' ? new Date(d) : d
-  return date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/')
-}
+import {type FC} from "react";
+import type {Notebook} from '@/types.ts'
 
 // Pattern 样式映射（深色主题）
 const patternStyles: Record<Notebook['pattern'], string> = {
@@ -19,28 +14,29 @@ const patternStyles: Record<Notebook['pattern'], string> = {
 }
 
 export const NotebookCover: FC<{ notebook: Notebook }> = ({ notebook }) => {
+  // 如果有 coverImage，优先显示图片
+  if (notebook.coverImage) {
+    return (
+      <div className="relative h-40 overflow-hidden rounded-t-2xl">
+        <img
+          src={notebook.coverImage}
+          alt={notebook.title}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" aria-hidden="true" />
+      </div>
+    )
+  }
+
+  // 否则显示纯色背景 + 图案
   return (
     <div className="relative h-40 overflow-hidden rounded-t-2xl" style={{ backgroundColor: notebook.coverColor }}>
-      {/* Pattern Overlay */}
       <div
         className="absolute inset-0 opacity-40 transition-opacity duration-300 group-hover:opacity-50"
         style={{ background: patternStyles[notebook.pattern] }}
         aria-hidden="true"
       />
-
-      {/* Gradient Fade (深色主题加深) */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" aria-hidden="true" />
-
-      {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-4">
-        <h3 className="font-gs font-medium text-white text-lg truncate drop-shadow-sm">
-          {notebook.title}
-        </h3>
-        <p className="text-xs text-gray-200/90 mt-1 flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-gray-300" aria-hidden="true" />
-          更新于 {formatDate(notebook.lastUpdated)}
-        </p>
-      </div>
+      <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent" aria-hidden="true" />
     </div>
   )
 }

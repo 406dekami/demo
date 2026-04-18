@@ -1,9 +1,10 @@
 // my-rag-frontend/src/components/notebook/ChatArea.tsx
 import { useState, useRef, useEffect } from 'react'
-import { Send, Bot, Network } from 'lucide-react'
+import { Send, Bot, GitBranch } from 'lucide-react'
 import MessageBubble from './MessageBubble'
 import { useNotebookStore } from '@/stores/notebookStore'
 import type { Message } from '@/types'
+import { queryNotebook } from '@/api/knowledge'
 
 interface ChatAreaProps {
   kbIds: string[]
@@ -13,10 +14,10 @@ interface ChatAreaProps {
 export default function ChatArea({ kbIds, notebookId }: ChatAreaProps) {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [useKnowledgeGraph, setUseKnowledgeGraph] = useState(true)
+  const [useMindMapContext, setUseMindMapContext] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const { messages, addMessage, draft, setDraft, saveToStorage } = useNotebookStore()
+  const { messages, addMessage, draft, setDraft, saveToStorage, conversationId, setConversationId } = useNotebookStore()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -29,8 +30,9 @@ export default function ChatArea({ kbIds, notebookId }: ChatAreaProps) {
   useEffect(() => {
     const savedDraft = localStorage.getItem(`notebook_${notebookId}_draft`)
     if (savedDraft) {
-      setDraft(JSON.parse(savedDraft))
-      setInput(JSON.parse(savedDraft))
+      const parsed = JSON.parse(savedDraft) as string
+      setDraft(parsed)
+      setInput(parsed)
     }
   }, [notebookId, setDraft])
 
@@ -38,8 +40,15 @@ export default function ChatArea({ kbIds, notebookId }: ChatAreaProps) {
     localStorage.setItem(`notebook_${notebookId}_draft`, JSON.stringify(draft))
   }, [draft, notebookId])
 
+  useEffect(() => {
+    if (!conversationId) {
+      setConversationId(notebookId)
+    }
+  }, [conversationId, notebookId, setConversationId])
+
   const sendMessage = async () => {
-    if (!input.trim() || isLoading || kbIds.length === 0) return
+    const kbId = kbIds[0]
+    if (!input.trim() || isLoading || !kbId) return
 
     const userMessage: Message = {
       id: `msg_${Date.now()}`,
@@ -54,30 +63,22 @@ export default function ChatArea({ kbIds, notebookId }: ChatAreaProps) {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/v1/rag/query', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify({
-          query: input,
-          kb_id: kbIds[0] || '',
-          use_knowledge_graph: useKnowledgeGraph,
-        }),
+      const result = await queryNotebook({
+        query: input,
+        kb_id: kbId,
+        conversation_id: conversationId || notebookId,
+        use_knowledge_graph: useMindMapContext,
       })
 
-      if (!response.ok) {
-        throw new Error('请求失败')
+      if (result.conversation_id) {
+        setConversationId(result.conversation_id)
       }
-
-      const result = await response.json()
 
       const assistantMessage: Message = {
         id: `msg_${Date.now() + 1}`,
         role: 'assistant',
-        content: result.data?.answer || '抱歉，我没有找到相关信息',
-        context: result.data?.context,
+        content: result.answer || '抱歉，我没有找到相关信息',
+        context: result.context,
         timestamp: new Date().toISOString(),
       }
 
@@ -85,13 +86,12 @@ export default function ChatArea({ kbIds, notebookId }: ChatAreaProps) {
       saveToStorage(notebookId)
     } catch (error) {
       console.error('发送消息失败:', error)
-      const errorMessage: Message = {
+      addMessage({
         id: `msg_${Date.now()}`,
         role: 'assistant',
-        content: '抱歉，发生错误，请稍后重试',
+        content: error instanceof Error ? error.message : '抱歉，发生错误，请稍后重试',
         timestamp: new Date().toISOString(),
-      }
-      addMessage(errorMessage)
+      })
     } finally {
       setIsLoading(false)
     }
@@ -100,7 +100,7 @@ export default function ChatArea({ kbIds, notebookId }: ChatAreaProps) {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      sendMessage()
+      void sendMessage()
     }
   }
 
@@ -119,11 +119,11 @@ export default function ChatArea({ kbIds, notebookId }: ChatAreaProps) {
               <Bot className="h-8 w-8" />
             </div>
             <p className="text-slate-300">开始提问，获取基于知识库的智能回答</p>
-            <p className="mt-2 text-sm text-slate-500">Shift+Enter 换行，Enter 发送</p>
+            <p className="mt-2 text-sm text-slate-500">当前版本仅支持单知识库问答</p>
           </div>
         ) : (
           <>
-            {messages.map(message => (
+            {messages.map((message) => (
               <MessageBubble key={message.id} message={message} />
             ))}
             {isLoading && (
@@ -151,7 +151,7 @@ export default function ChatArea({ kbIds, notebookId }: ChatAreaProps) {
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyPress}
-            placeholder={kbIds.length === 0 ? '请先选择知识库' : '输入你的问题...（Shift+Enter 换行）'}
+            placeholder={kbIds.length === 0 ? '请先选择一个知识库' : '输入你的问题...（Shift+Enter 换行）'}
             className="w-full resize-none rounded-2xl border border-slate-800/80 bg-slate-950/60 px-4 py-3 text-white placeholder-slate-500 transition-all focus:border-sky-400/35 focus:outline-none focus:ring-2 focus:ring-sky-400/10"
             rows={2}
             disabled={isLoading || kbIds.length === 0}
@@ -160,19 +160,19 @@ export default function ChatArea({ kbIds, notebookId }: ChatAreaProps) {
           <div className="flex items-center justify-between">
             <button
               type="button"
-              onClick={() => setUseKnowledgeGraph(!useKnowledgeGraph)}
-              className={`flex items-center gap-2 rounded-lg px-3 py-1.5 transition-all ${useKnowledgeGraph ? 'bg-sky-500/10 text-sky-300 hover:bg-sky-500/20' : 'bg-slate-900/60 text-slate-400 hover:bg-slate-800/80'}`}
-              title={useKnowledgeGraph ? '已启用知识图谱（教材）' : '已禁用知识图谱（仅用资料库）'}
-              aria-label="切换知识图谱检索"
+              onClick={() => setUseMindMapContext(!useMindMapContext)}
+              className={`flex items-center gap-2 rounded-lg px-3 py-1.5 transition-all ${useMindMapContext ? 'bg-sky-500/10 text-sky-300 hover:bg-sky-500/20' : 'bg-slate-900/60 text-slate-400 hover:bg-slate-800/80'}`}
+              title={useMindMapContext ? '已启用思维导图上下文（学习路径）' : '已禁用思维导图上下文（仅用资料库）'}
+              aria-label="切换思维导图上下文"
             >
-              <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${useKnowledgeGraph ? 'border-sky-500 bg-sky-500/20' : 'border-slate-600 bg-slate-700/50'}`}>
-                {useKnowledgeGraph && <Network className="h-3 w-3 text-sky-400" />}
+              <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${useMindMapContext ? 'border-sky-500 bg-sky-500/20' : 'border-slate-600 bg-slate-700/50'}`}>
+                {useMindMapContext && <GitBranch className="h-3 w-3 text-sky-400" />}
               </div>
-              <span className="text-xs">{useKnowledgeGraph ? '📚 混合检索' : '📁 仅资料库'}</span>
+              <span className="text-xs">{useMindMapContext ? '🌳 含学习路径' : '📁 仅资料库'}</span>
             </button>
 
             <button
-              onClick={sendMessage}
+              onClick={() => void sendMessage()}
               disabled={!input.trim() || isLoading || kbIds.length === 0}
               className="rounded-xl bg-blue-600 px-6 py-2 text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500 disabled:shadow-none"
             >

@@ -50,7 +50,7 @@ export const MindMapPage: FC = () => {
       if (isLoggedIn) {
         try {
           const data = await getUserProgress()
-          if (!cancelled) setCompletedIds(new Set(data.completed_ids))
+          if (!cancelled && data) setCompletedIds(new Set(data.completed_ids))
         } catch {
           loadLocalStorageData()
         }

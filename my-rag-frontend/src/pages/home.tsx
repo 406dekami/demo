@@ -1,12 +1,12 @@
-import { type FC, useMemo, useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
-import type { KnowledgeBase, Notebook } from '@/types'
-import { KnowledgeCard } from '@/components/knowledge'
-import { NotebookGridPage } from '@/pages/Notebook'
-import { Plus } from 'lucide-react'
-import { toast } from 'react-hot-toast'
+import {type FC, useEffect, useMemo, useState} from 'react'
+import {useLocation, useNavigate} from 'react-router-dom'
+import type {KnowledgeBase, Notebook} from '@/types'
+import {KnowledgeCard} from '@/components/knowledge'
+import {NotebookGridPage} from '@/pages/Notebook'
+import {Plus} from 'lucide-react'
+import {toast} from 'react-hot-toast'
 import CreateKnowledgeBaseModal from '@/components/knowledge/CreateKnowledgeBaseModal'
-import { createKnowledgeBase } from '@/api/knowledge'
+import {createKnowledgeBase} from '@/api/knowledge'
 
 interface Props {
   bases: KnowledgeBase[]
@@ -38,12 +38,13 @@ export const HomePage: FC<Props> = ({ bases, onAddBase, onDeleteBase, notebooks,
   const getNotebookPreview = useMemo(() => (b: KnowledgeBase): Notebook => ({
     id: b.id,
     title: b.name,
-    coverColor: ['#fef3c7', '#bfdbfe', '#fecaca', '#e0f2fe', '#fde68a', '#a7f3d0', '#ddd6fe'][b.id.charCodeAt(0) % 7],
+    coverColor: b.coverColor || ['#fef3c7', '#bfdbfe', '#fecaca', '#e0f2fe', '#fde68a', '#a7f3d0', '#ddd6fe'][b.id.charCodeAt(0) % 7],
     pattern: ['dots', 'waves', 'tiles', 'hearts', 'rain', 'triangles', 'solid'][b.id.charCodeAt(1) % 7] as Notebook['pattern'],
     lastUpdated: b.updated_at || new Date().toISOString(),
+    coverImage: b.coverImage,
   }), [])
 
-  const handleCreateNewBase = async (data: { name: string; description: string; chunk_size: number; chunk_overlap: number }) => {
+  const handleCreateNewBase = async (data: { name: string; description: string; chunk_size: number; chunk_overlap: number; coverColor?: string; coverImage?: string }) => {
     if (isCreating) return
 
     setIsCreating(true)

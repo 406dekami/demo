@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
-import { parseTags, TAG_MAP } from '@/utils/model-tags'
+import {useEffect, useState} from 'react'
+import {parseTags, TAG_MAP} from '@/utils/model-tags'
+import apiClient from '@/api/client'
 
 interface FactoryModel {
   id: number
@@ -17,10 +18,6 @@ interface UseFactoriesResult {
   refetch: () => void
 }
 
-/**
- * 获取厂商列表的自定义 hook
- * @returns 厂商列表、加载状态、错误信息和刷新函数
- */
 export const useFactories = (): UseFactoriesResult => {
   const [factories, setFactories] = useState<FactoryModel[]>([])
   const [loading, setLoading] = useState(false)
@@ -30,16 +27,13 @@ export const useFactories = (): UseFactoriesResult => {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/v1/model/factories')
-      const data = await response.json()
+      const response = await apiClient.get<{ code: number; message: string; data?: { factories?: Array<{ tags: unknown; id: number; name: string; logo: string; rank?: number; status?: string }> } }>('/model/factories')
+      const data = response.data
 
-      if (data.code === 200) {
+      if (data.code === 0) {
         const factoriesData = data.data?.factories || []
-        const processedFactories = factoriesData.map((f: { tags: unknown; id: number; name: string; logo: string; rank?: number; status?: string }) => {
-          // 解析和处理 tags
+        const processedFactories = factoriesData.map((f) => {
           const rawTags = parseTags(f.tags)
-
-          // 标准化 tag
           const normalizedTags = rawTags
             .map((rawTag: string) => TAG_MAP[rawTag.trim().toUpperCase()] || null)
             .filter((t: string | null): t is string => t !== null)
@@ -50,7 +44,7 @@ export const useFactories = (): UseFactoriesResult => {
             logo: f.logo,
             tags: normalizedTags,
             rank: f.rank,
-            status: f.status
+            status: f.status,
           }
         })
         setFactories(processedFactories)
@@ -65,13 +59,13 @@ export const useFactories = (): UseFactoriesResult => {
   }
 
   useEffect(() => {
-    loadFactories()
+    void loadFactories()
   }, [])
 
   return {
     factories,
     loading,
     error,
-    refetch: loadFactories
+    refetch: loadFactories,
   }
 }

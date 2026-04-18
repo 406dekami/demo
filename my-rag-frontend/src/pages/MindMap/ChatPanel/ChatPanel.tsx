@@ -178,7 +178,7 @@ export const ChatPanel = ({ node, onToggleCollapse, isCollapsed }: ChatPanelProp
 
       const response = await sendQuestion(chatData)
       
-      if (response.success && response.data) {
+      if (response.code === 0 && response.data) {
         const assistantMessage = {
           id: crypto.randomUUID(),
           role: 'assistant' as const,

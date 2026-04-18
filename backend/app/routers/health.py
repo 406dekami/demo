@@ -4,19 +4,21 @@
 """
 from fastapi import APIRouter
 
+from ..utils.api_response import success_response
+
 router = APIRouter()
+
 
 @router.get("/health", summary="健康检查")
 async def health_check():
     """服务健康状态检查"""
-    return {"status": "ok", "message": "Service is running"}
+    return success_response({"status": "ok"}, "Service is running")
 
 
 @router.get("/", summary="根路径")
 async def root():
     """根路径欢迎信息"""
-    return {
-        "message": "Welcome to RAG Platform API",
+    return success_response({
         "docs": "/docs",
         "version": "1.0.0"
-    }
+    }, "Welcome to RAG Platform API")

@@ -11,7 +11,6 @@ const apiClient = axios.create({
   },
 })
 
-// 请求拦截器：自动携带 Token
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('auth_token')
@@ -23,13 +22,11 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// 响应拦截器：统一处理错误提示
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.message || error.message || '网络请求失败'
-    
-    // 根据状态码进行不同处理
+    const message = error.response?.data?.message || error.response?.data?.detail || error.message || '网络请求失败'
+
     switch (error.response?.status) {
       case 401:
         toast.error('登录已过期，请重新登录')
@@ -40,15 +37,15 @@ apiClient.interceptors.response.use(
         toast.error('没有权限访问该资源')
         break
       case 404:
-        toast.error('请求的资源不存在')
+        toast.error(message || '请求的资源不存在')
         break
       case 500:
-        toast.error('服务器内部错误')
+        toast.error(message || '服务器内部错误')
         break
       default:
         toast.error(message)
     }
-    
+
     return Promise.reject(error)
   }
 )
