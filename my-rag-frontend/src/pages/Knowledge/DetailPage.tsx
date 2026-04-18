@@ -137,7 +137,7 @@ export const KnowledgeDetailPage: FC<Props> = ({ bases, onAddBase }) => {
   }
 
   return (
-    <div className={`min-h-screen px-6 py-8 ${isDark ? 'bg-[radial-gradient(circle_at_top,rgba(14,165,233,.12),transparent_28%),radial-gradient(circle_at_88%_20%,rgba(167,139,250,.14),transparent_24%),linear-gradient(180deg,#020617_0%,#0b1120_100%)] text-slate-100' : 'bg-gradient-to-b from-blue-50 via-white to-sky-50 text-slate-900'}`}>
+    <div className={`min-h-screen overflow-auto px-6 py-8 ${isDark ? 'bg-[radial-gradient(circle_at_top,rgba(14,165,233,.12),transparent_28%),radial-gradient(circle_at_88%_20%,rgba(167,139,250,.14),transparent_24%),linear-gradient(180deg,#020617_0%,#0b1120_100%)] text-slate-100' : 'bg-gradient-to-b from-blue-50 via-white to-sky-50 text-slate-900'}`}>
       <div className="mx-auto max-w-6xl space-y-6">
         <section className={`rounded-2xl border p-6 ${isDark ? 'border-slate-800 bg-slate-900/60' : 'border-slate-200 bg-white'}`}>
           <div className="flex flex-wrap items-center justify-between gap-4">

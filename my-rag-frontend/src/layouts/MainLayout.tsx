@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
-import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Sun, Moon, UserCircle } from 'lucide-react'
-import type { KnowledgeBase, Notebook } from '@/types'
+import {useEffect, useState} from 'react'
+import {Outlet, useLocation, useNavigate} from 'react-router-dom'
+import {Moon, Sun, UserCircle} from 'lucide-react'
+import type {KnowledgeBase, Notebook} from '@/types'
 
 interface MainLayoutProps {
   bases: KnowledgeBase[]
@@ -131,7 +131,7 @@ export const MainLayout = (_props: MainLayoutProps) => {
           </div>
         </div>
       </header>
-      <main className="pt-16 h-screen overflow-hidden">
+      <main className="pt-16 h-screen overflow-auto">
         <Outlet />
       </main>
     </div>

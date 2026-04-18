@@ -45,33 +45,39 @@ export default function UploadZone({ kbId, disabled = false }: UploadZoneProps) 
 
     files.forEach((f) => addUploadingFile(f))
 
-    for (const uploadFile of files) {
-      try {
-        updateUploadingFile(uploadFile.id, { status: 'uploading', progress: 10 })
-        const uploadResult = await uploadKnowledgeFiles(kbId, [uploadFile.file])
-        const documentId = uploadResult.files?.[0]?.file_id
-        if (!documentId) throw new Error('未获取到文档 ID')
+    // 并发处理所有文件
+    await Promise.allSettled(
+      files.map(async (uploadFile) => {
+        try {
+          updateUploadingFile(uploadFile.id, { status: 'uploading', progress: 10 })
+          const uploadResult = await uploadKnowledgeFiles(kbId, [uploadFile.file])
+          const documentId = uploadResult.files?.[0]?.file_id
+          if (!documentId) throw new Error('未获取到文档 ID')
 
-        updateUploadingFile(uploadFile.id, { status: 'processing', progress: 50 })
-        await processDocument(documentId, 512, 50)
+          updateUploadingFile(uploadFile.id, { status: 'processing', progress: 50 })
+          await processDocument(documentId, 512, 50)
 
-        updateUploadingFile(uploadFile.id, { status: 'done', progress: 100, message: '处理完成' })
+          updateUploadingFile(uploadFile.id, { status: 'done', progress: 100, message: '处理完成' })
 
-        const docs = await getKnowledgeBaseDocuments(kbId)
-        setDocuments(docs.map((doc: any) => ({
-          id: doc.id,
-          name: doc.name,
-          status: doc.parse_status === 'pending' ? 'processing' : doc.parse_status,
-          chunkCount: doc.chunk_count,
-          uploadTime: new Date(doc.create_time || Date.now()).toISOString(),
-          fileSize: doc.file_size,
-          message: doc.parse_msg,
-        })))
-      } catch (error) {
-        console.error('上传处理失败:', error)
-        updateUploadingFile(uploadFile.id, { status: 'failed', message: error instanceof Error ? error.message : '处理失败' })
-      }
-    }
+          // 成功后自动移除进度项
+          setTimeout(() => removeUploadingFile(uploadFile.id), 1000)
+
+          const docs = await getKnowledgeBaseDocuments(kbId)
+          setDocuments(docs.map((doc: any) => ({
+            id: doc.id,
+            name: doc.name,
+            status: doc.parse_status === 'pending' ? 'processing' : doc.parse_status,
+            chunkCount: doc.chunk_count,
+            uploadTime: new Date(doc.create_time || Date.now()).toISOString(),
+            fileSize: doc.file_size,
+            message: doc.parse_msg,
+          })))
+        } catch (error) {
+          console.error('上传处理失败:', error)
+          updateUploadingFile(uploadFile.id, { status: 'failed', message: error instanceof Error ? error.message : '处理失败' })
+        }
+      })
+    )
   }, [kbId, addUploadingFile, updateUploadingFile, setDocuments])
 
   const handleDragOver = (e: React.DragEvent) => {

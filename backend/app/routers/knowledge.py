@@ -20,6 +20,9 @@ from ..utils.get_tenant_id import get_tenant_id
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+# 文档内容缓存：{doc_id: content}
+_document_content_cache: dict[str, str] = {}
+
 
 def serialize_knowledge_base(kb: KnowledgeBase) -> dict:
     doc_count = Document.select().where(
@@ -247,6 +250,17 @@ async def get_document_content(request: Request, kb_id: str, doc_id: str):
         if not doc:
             return error_response("文档不存在", code=404)
 
+        # 检查缓存
+        if doc_id in _document_content_cache:
+            logger.info(f"✅ 文档内容命中缓存：doc_id={doc_id}")
+            return success_response({
+                "kb_id": kb_id,
+                "doc_id": doc_id,
+                "doc_name": doc.name,
+                "file_type": doc.file_type,
+                "content": _document_content_cache[doc_id]
+            })
+
         # 读取文件内容
         file_path = doc.file_path
         file_type = doc.file_type.lower().lstrip('.')
@@ -295,6 +309,10 @@ async def get_document_content(request: Request, kb_id: str, doc_id: str):
                 return error_response(f"DOC解析失败：{str(e)}")
         else:
             return error_response(f"不支持的文件类型：{file_type}")
+
+        # 存入缓存
+        _document_content_cache[doc_id] = content
+        logger.info(f"💾 文档内容已缓存：doc_id={doc_id}, 长度={len(content)}")
 
         return success_response({
             "kb_id": kb_id,
@@ -387,6 +405,11 @@ async def delete_document(request: Request, kb_id: str, doc_id: str):
 
         Chunk.delete().where(Chunk.document_id == doc_id).execute()
         doc.delete_instance()
+
+        # 清理缓存
+        if doc_id in _document_content_cache:
+            del _document_content_cache[doc_id]
+            logger.info(f"🗑️ 已清理文档缓存：doc_id={doc_id}")
 
         return success_response(None, "文档删除成功")
     except Exception as e:
