@@ -11,6 +11,8 @@
 # 数据库和存储
 /backend/storage/
 /backend/app/data/uploads/
+**/chroma.sqlite3
+**/*.bin
 
 # 日志
 /backend/logs/

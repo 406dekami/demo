@@ -9,6 +9,7 @@ from .knowledge import KnowledgeBase, Document, Chunk
 from .knowledge_graph import KnowledgeNode, KnowledgeRelation
 from .mind_map import MindMapNode
 from .progress import UserNodeProgress
+from .llm import LLMFactory, LLMModel, ModelConfig
 
 __all__ = [
     # 基类
@@ -31,6 +32,9 @@ __all__ = [
     
     # 学习进度
     'UserNodeProgress',
+    
+    # LLM 模型管理
+    'LLMFactory', 'LLMModel', 'ModelConfig',
 ]
 
 
@@ -43,4 +47,5 @@ def get_all_models():
         KnowledgeNode, KnowledgeRelation,
         MindMapNode,
         UserNodeProgress,
+        LLMFactory, LLMModel, ModelConfig,
     ]
