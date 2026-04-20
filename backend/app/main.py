@@ -2,10 +2,10 @@
 """
 FastAPI 应用工厂 - 负责创建和配置 app 实例
 """
-from contextlib import asynccontextmanager
 import logging
 import os
 import sys
+from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -53,11 +53,18 @@ async def lifespan(application: FastAPI):
 
     start_time = time.perf_counter()
 
-    print("\n📊 [1/1] 初始化数据库表...")
+    print("\n📊 [1/2] 初始化数据库表...")
     step_start = time.perf_counter()
     init_tables()
     step_elapsed = time.perf_counter() - step_start
     print(f"✅ 数据库表初始化完成 (耗时：{step_elapsed:.3f}s)")
+
+    print("\n📊 [2/2] 检查并初始化种子数据...")
+    step_start = time.perf_counter()
+    from .db.init_data import auto_init_on_startup
+    auto_init_on_startup()
+    step_elapsed = time.perf_counter() - step_start
+    print(f"✅ 种子数据检查完成 (耗时：{step_elapsed:.3f}s)")
 
     print("⚡ LLM 数据将在首次访问模型管理时加载")
     print("⚠️  Neo4j 将在首次使用时连接")

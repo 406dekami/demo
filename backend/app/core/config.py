@@ -56,6 +56,10 @@ class Settings:
     # 数据库路径
     DB_PATH = SQLITE_DIR / "demo.db"
 
+    # 数据初始化配置
+    AUTO_INIT_SEED_DATA = os.getenv("AUTO_INIT_SEED_DATA", "true").lower() in ("true", "1", "yes")
+    FORCE_REINIT = os.getenv("FORCE_REINIT", "false").lower() in ("true", "1", "yes")
+
 
 # 全局配置实例
 settings = Settings()

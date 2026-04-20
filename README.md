@@ -95,6 +95,42 @@ demo/
 DASHSCOPE_API_KEY=sk-xxx  # 必需，通义千问 API Key
 REDIS_URL=redis://localhost:6379  # 可选
 NEO4J_URI=bolt://localhost:7687   # 可选
+AUTO_INIT_SEED_DATA=true          # 启动时自动初始化种子数据
+FORCE_REINIT=false                # 强制重新初始化（谨慎使用）
+```
+
+### 数据初始化
+
+系统内置思维导图和知识图谱的种子数据，支持自动初始化：
+
+**自动初始化**（推荐）
+- 首次启动时自动检测并加载种子数据
+- 幂等性保证，重复启动不会重复插入
+- 通过 `AUTO_INIT_SEED_DATA=false` 可禁用
+
+**手动初始化**
+```bash
+cd backend
+
+# 查看初始化状态
+python scripts/init_data.py --status
+
+# 初始化所有数据
+python scripts/init_data.py --all
+
+# 仅初始化思维导图
+python scripts/init_data.py --mind-map
+
+# 强制重新初始化（清空现有数据）
+python scripts/init_data.py --force --all
+```
+
+**种子数据位置**
+```
+backend/data/seeds/
+├── mind_map_data.json    # 思维导图节点和关系数据
+├── nodes.csv             # (备用)
+└── relationships.csv     # (备用)
 ```
 
 ## 🧪 测试
