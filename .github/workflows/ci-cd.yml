@@ -88,39 +88,39 @@ jobs:
           retention-days: 7
 
   # ==================== 部署（可选）====================
-  deploy:
-    name: Deploy to Server
-    needs: [backend-test, frontend-test]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Download frontend artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-dist
-          path: my-rag-frontend/dist/
-      
-      - name: Deploy via SSH
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "backend/,my-rag-frontend/dist/"
-          target: "/opt/rag-app/"
-          strip_components: 0
-      
-      - name: Restart services
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            cd /opt/rag-app
-            docker-compose up -d --build
-            echo "✅ 部署完成"
+#  deploy:
+#    name: Deploy to Server
+#    needs: [backend-test, frontend-test]
+#    runs-on: ubuntu-latest
+#    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Download frontend artifacts
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: frontend-dist
+#          path: my-rag-frontend/dist/
+#
+#      - name: Deploy via SSH
+#        uses: appleboy/scp-action@master
+#        with:
+#          host: ${{ secrets.DEPLOY_HOST }}
+#          username: ${{ secrets.DEPLOY_USER }}
+#          key: ${{ secrets.DEPLOY_SSH_KEY }}
+#          source: "backend/,my-rag-frontend/dist/"
+#          target: "/opt/rag-app/"
+#          strip_components: 0
+#
+#      - name: Restart services
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.DEPLOY_HOST }}
+#          username: ${{ secrets.DEPLOY_USER }}
+#          key: ${{ secrets.DEPLOY_SSH_KEY }}
+#          script: |
+#            cd /opt/rag-app
+#            docker-compose up -d --build
+#            echo "✅ 部署完成"
