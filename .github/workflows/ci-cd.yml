@@ -8,9 +8,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.13'
-  NODE_VERSION: '20'
-  # 提前启用 Node.js 24 支持，避免废弃警告
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+  NODE_VERSION: '24'
 
 jobs:
   # ==================== 后端测试 ====================

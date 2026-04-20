@@ -100,7 +100,6 @@ export const MindMapPage: FC = () => {
     handleMouseMove,
     stopDrag,
     zoomByButton,
-    resetView,
   } = useMindMapViewport({ viewportRef })
 
   const path = useMemo(() => pathData || [], [pathData])
