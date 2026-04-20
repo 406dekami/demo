@@ -16,10 +16,6 @@ from ..core.config import settings
 from ..db import KnowledgeBase, Document
 
 
-# 基础上传目录：使用配置中的租户隔离路径
-# 实际路径在 save_uploaded_file 中动态生成
-
-
 async def save_uploaded_file(
     file: UploadFile,
     kb_id: str,

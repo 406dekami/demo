@@ -8,7 +8,7 @@ from pathlib import Path
 from io import BytesIO
 from fastapi import UploadFile
 
-from backend.app.utils.file_upload import save_uploaded_file, validate_knowledge_base, BASE_UPLOAD_DIR
+from backend.app.utils.file_upload import save_uploaded_file, validate_knowledge_base
 from backend.app.db.models import KnowledgeBase, Document, DB
 
 @pytest.fixture(scope="module")

@@ -111,7 +111,7 @@ export const NotebookDetailPage: FC<Props> = ({ notebooks, knowledgeBases, onUpd
 
               <div>
                 <h1 className="text-2xl font-semibold text-white">{notebook.title}</h1>
-                <p className="mt-2 text-sm text-slate-400">统一科技蓝风格 · 基于知识库的智能问答</p>
+                <p className="mt-2 text-sm text-slate-400">基于知识库的智能问答</p>
               </div>
             </div>
 

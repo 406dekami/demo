@@ -221,7 +221,7 @@ async def delete_knowledge_base(request: Request, kb_id: str):
         # 删除向量库（必须成功）
         from ..core.config import settings
         import shutil
-        vector_store_dir = settings.STORAGE_DIR / 'chroma_db' / kb_id
+        vector_store_dir = settings.CHROMA_PERSIST_DIRECTORY / kb_id
         if vector_store_dir.exists():
             try:
                 shutil.rmtree(vector_store_dir)

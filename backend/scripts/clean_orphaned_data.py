@@ -35,7 +35,7 @@ def clean_orphaned_chroma_data(dry_run: bool = True):
         DB.close()
     
     # 扫描 ChromaDB 目录
-    chroma_dir = settings.STORAGE_DIR / 'chroma_db'
+    chroma_dir = settings.CHROMA_PERSIST_DIRECTORY
     if not chroma_dir.exists():
         logger.warning(f"⚠️ ChromaDB 目录不存在：{chroma_dir}")
         return

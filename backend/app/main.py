@@ -8,15 +8,16 @@ import sys
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
+
+# 加载环境变量（从 .env 文件）- 必须在导入 config 之前
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
 from .core.config import settings
 from .routers import api_router
-
-# 加载环境变量（从 .env 文件）
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 # 配置日志格式
 logging.basicConfig(

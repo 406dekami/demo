@@ -20,7 +20,7 @@ class VectorStore:
         self.kb_id = kb_id
         # 使用配置化的存储路径
         from ..core.config import settings
-        chroma_path = settings.STORAGE_DIR / 'chroma_db' / str(kb_id)
+        chroma_path = settings.CHROMA_PERSIST_DIRECTORY / str(kb_id)
         chroma_path.mkdir(parents=True, exist_ok=True)
         self.client = chromadb.PersistentClient(path=str(chroma_path))
         self.collection = self.client.get_or_create_collection(

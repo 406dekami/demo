@@ -43,9 +43,16 @@ class Settings:
     # 路径配置
     BASE_DIR = Path(__file__).parent.parent.parent
     SEEDS_DIR = BASE_DIR / "seeds"                    # 种子数据目录
-    APP_DATA_DIR = Path(__file__).parent / "data"     # 用户数据根目录
-    STORAGE_DIR = BASE_DIR / "storage"
-    LOGS_DIR = BASE_DIR / "logs"
+    
+    # 读取路径配置（支持相对路径和绝对路径）
+    app_data_dir_env = os.getenv("APP_DATA_DIR")
+    storage_dir_env = os.getenv("STORAGE_DIR")
+    log_dir_env = os.getenv("LOG_DIR")
+    
+    # 如果是相对路径，则基于 BASE_DIR；如果是绝对路径，直接使用
+    APP_DATA_DIR = Path(app_data_dir_env) if app_data_dir_env and Path(app_data_dir_env).is_absolute() else BASE_DIR / (app_data_dir_env or "app/data")
+    STORAGE_DIR = Path(storage_dir_env) if storage_dir_env and Path(storage_dir_env).is_absolute() else BASE_DIR / (storage_dir_env or "storage")
+    LOGS_DIR = Path(log_dir_env) if log_dir_env and Path(log_dir_env).is_absolute() else BASE_DIR / (log_dir_env or "logs")
     TEMP_DIR = APP_DATA_DIR / "temp"                  # 临时文件目录
 
     # 确保目录存在
@@ -53,7 +60,16 @@ class Settings:
         directory.mkdir(parents=True, exist_ok=True)
 
     # 数据库路径
-    DB_PATH = STORAGE_DIR / "sqlite" / "demo.db"
+    db_path_env = os.getenv("DATABASE_PATH")
+    if db_path_env:
+        # 如果是绝对路径，直接使用；否则基于 STORAGE_DIR
+        DB_PATH = Path(db_path_env) if Path(db_path_env).is_absolute() else STORAGE_DIR / db_path_env
+    else:
+        DB_PATH = STORAGE_DIR / "sqlite" / "demo.db"
+    
+    # 向量数据库路径
+    chroma_path_env = os.getenv("CHROMA_PERSIST_DIRECTORY")
+    CHROMA_PERSIST_DIRECTORY = Path(chroma_path_env) if chroma_path_env and Path(chroma_path_env).is_absolute() else STORAGE_DIR / (chroma_path_env or "chroma_db")
     
     # 租户数据目录辅助方法
     @staticmethod
