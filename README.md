@@ -127,10 +127,17 @@ python scripts/init_data.py --force --all
 
 **种子数据位置**
 ```
-backend/data/seeds/
-├── mind_map_data.json    # 思维导图节点和关系数据
-├── nodes.csv             # (备用)
-└── relationships.csv     # (备用)
+backend/seeds/
+└── mind_map_data.json    # 思维导图节点和关系数据
+```
+
+**用户数据位置**（Git忽略）
+```
+backend/app/data/
+├── {tenant_id}/          # 租户隔离
+│   ├── uploads/          # 上传文档
+│   └── avatars/          # 用户头像
+└── temp/                  # 临时文件
 ```
 
 ## 🧪 测试

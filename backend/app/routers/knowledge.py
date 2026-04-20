@@ -218,12 +218,19 @@ async def delete_knowledge_base(request: Request, kb_id: str):
 
         Chunk.delete().where(Chunk.kb_id == kb_id).execute()
 
-        try:
-            vector_store_dir = f"database/chroma_db/{kb_id}"
-            if os.path.exists(vector_store_dir):
+        # 删除向量库（必须成功）
+        from ..core.config import settings
+        import shutil
+        vector_store_dir = settings.STORAGE_DIR / 'chroma_db' / kb_id
+        if vector_store_dir.exists():
+            try:
                 shutil.rmtree(vector_store_dir)
-        except Exception as e:
-            logger.warning(f"⚠️ 删除向量库失败：{e}")
+                logger.info(f"✅ 已删除向量库：{vector_store_dir}")
+            except Exception as e:
+                logger.error(f"❌ 删除向量库失败：{e}")
+                raise RuntimeError(f"删除向量库失败：{e}")
+        else:
+            logger.warning(f"⚠️ 向量库目录不存在：{vector_store_dir}")
 
         kb.delete_instance()
         return success_response(None, "知识库删除成功")

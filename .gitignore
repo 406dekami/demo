@@ -9,11 +9,11 @@
 /my-rag-frontend/dist/
 
 # 数据库和存储
-/backend/storage/
-/backend/app/data/uploads/
-**/chroma.sqlite3
-**/*.bin
-/backend/data/
+/backend/storage/               # 系统存储（SQLite、ChromaDB）
+/backend/app/data/              # 用户数据（租户隔离）
+**/chroma.sqlite3               # ChromaDB 索引文件
+**/*.bin                        # ChromaDB 向量数据
+
 # 日志
 /backend/logs/
 
@@ -35,3 +35,6 @@ Thumbs.db
 # 临时文件
 *.tmp
 *.log
+
+# 种子数据（不忽略，需要版本控制）
+!/backend/seeds/

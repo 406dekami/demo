@@ -3,23 +3,21 @@
 文件上传工具模块
 负责文件的本地存储、数据库记录创建和异步处理调度
 """
+import logging
 import os
-import uuid
 import shutil
+import uuid
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-from fastapi import UploadFile
-import logging
 
+from fastapi import UploadFile
+
+from ..core.config import settings
 from ..db import KnowledgeBase, Document
 
 
-# 基础上传目录：backend/data/uploads/
-BASE_UPLOAD_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), 
-    "data",
-    "uploads"
-)
+# 基础上传目录：使用配置中的租户隔离路径
+# 实际路径在 save_uploaded_file 中动态生成
 
 
 async def save_uploaded_file(
@@ -55,9 +53,10 @@ async def save_uploaded_file(
         
         ext_folder_name = file_ext.lstrip('.')
         
-        # 3. 构建存储路径：backend/data/uploads/{tenant_id}/{kb_id}/{ext}/
-        dest_dir = os.path.join(BASE_UPLOAD_DIR, str(tenant_id), str(kb_id), ext_folder_name)
-        os.makedirs(dest_dir, exist_ok=True)
+        # 3. 构建存储路径：使用配置中的租户上传目录
+        upload_dir = settings.get_tenant_upload_dir(str(tenant_id))
+        dest_dir = upload_dir / str(kb_id) / ext_folder_name
+        dest_dir.mkdir(parents=True, exist_ok=True)
         
         # 4. 生成唯一文件名
         unique_filename = f"{uuid.uuid4().hex}_{safe_filename}"

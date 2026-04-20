@@ -42,19 +42,40 @@ class Settings:
 
     # 路径配置
     BASE_DIR = Path(__file__).parent.parent.parent
-    CONF_DIR = BASE_DIR / "conf"
-    DATA_DIR = BASE_DIR / "data"
+    SEEDS_DIR = BASE_DIR / "seeds"                    # 种子数据目录
+    APP_DATA_DIR = Path(__file__).parent / "data"     # 用户数据根目录
     STORAGE_DIR = BASE_DIR / "storage"
-    SQLITE_DIR = STORAGE_DIR / "sqlite"
     LOGS_DIR = BASE_DIR / "logs"
-    AVATAR_DIR = DATA_DIR / "avatars"
+    TEMP_DIR = APP_DATA_DIR / "temp"                  # 临时文件目录
 
     # 确保目录存在
-    for directory in [DATA_DIR, STORAGE_DIR, SQLITE_DIR, LOGS_DIR, AVATAR_DIR]:
+    for directory in [SEEDS_DIR, APP_DATA_DIR, TEMP_DIR, STORAGE_DIR, LOGS_DIR]:
         directory.mkdir(parents=True, exist_ok=True)
 
     # 数据库路径
-    DB_PATH = SQLITE_DIR / "demo.db"
+    DB_PATH = STORAGE_DIR / "sqlite" / "demo.db"
+    
+    # 租户数据目录辅助方法
+    @staticmethod
+    def get_tenant_dir(tenant_id: str) -> Path:
+        """获取租户数据目录"""
+        tenant_dir = Settings.APP_DATA_DIR / tenant_id
+        tenant_dir.mkdir(parents=True, exist_ok=True)
+        return tenant_dir
+    
+    @staticmethod
+    def get_tenant_upload_dir(tenant_id: str) -> Path:
+        """获取租户上传目录"""
+        upload_dir = Settings.get_tenant_dir(tenant_id) / "uploads"
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        return upload_dir
+    
+    @staticmethod
+    def get_tenant_avatar_dir(tenant_id: str) -> Path:
+        """获取租户头像目录"""
+        avatar_dir = Settings.get_tenant_dir(tenant_id) / "avatars"
+        avatar_dir.mkdir(parents=True, exist_ok=True)
+        return avatar_dir
 
     # 数据初始化配置
     AUTO_INIT_SEED_DATA = os.getenv("AUTO_INIT_SEED_DATA", "true").lower() in ("true", "1", "yes")

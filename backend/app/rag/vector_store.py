@@ -1,8 +1,8 @@
 # ChromaDB 封装
-import chromadb
-from chromadb.config import Settings
-from typing import List, Dict, Any, Optional
 import logging
+from typing import List, Dict, Any, Optional
+
+import chromadb
 
 logger = logging.getLogger(__name__)
 
@@ -18,13 +18,11 @@ class VectorStore:
             kb_id: 知识库 ID
         """
         self.kb_id = kb_id
-        # ChromaDB 数据路径：从当前文件向上三级到 backend/database/chroma_db/
-        import os
-        chroma_path = os.path.join(
-            os.path.dirname(__file__),  # app/rag/
-            '..', '..', 'database', 'chroma_db', str(kb_id)  # ../../database/chroma_db/{kb_id}
-        )
-        self.client = chromadb.PersistentClient(path=chroma_path)
+        # 使用配置化的存储路径
+        from ..core.config import settings
+        chroma_path = settings.STORAGE_DIR / 'chroma_db' / str(kb_id)
+        chroma_path.mkdir(parents=True, exist_ok=True)
+        self.client = chromadb.PersistentClient(path=str(chroma_path))
         self.collection = self.client.get_or_create_collection(
             name=f"kb_{kb_id}",
             metadata={"hnsw:space": "cosine"}  # 使用余弦相似度

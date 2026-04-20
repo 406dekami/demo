@@ -5,7 +5,6 @@
 """
 import json
 import uuid
-from pathlib import Path
 from typing import Dict, Any
 
 from loguru import logger
@@ -18,7 +17,9 @@ from .neo4j_client import get_neo4j_client
 
 def _load_seed_data() -> Dict[str, Any]:
     """加载种子数据文件"""
-    seed_path = Path(__file__).parent.parent.parent / 'data' / 'seeds' / 'mind_map_data.json'
+    from ..core.config import settings
+    
+    seed_path = settings.SEEDS_DIR / 'mind_map_data.json'
     
     if not seed_path.exists():
         logger.error(f"❌ 种子数据文件不存在: {seed_path}")

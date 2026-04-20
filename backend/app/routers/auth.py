@@ -2,15 +2,16 @@
 """
 用户认证 API - 登录/注册/登出
 """
-from fastapi import APIRouter, HTTPException, Request, UploadFile, File
-import time
 import logging
+import time
 from pathlib import Path
+
+from fastapi import APIRouter, HTTPException, Request, UploadFile, File
 
 from ..core.config import settings
 from ..db import User
-from ..utils.token import generate_token, verify_token, invalidate_token
 from ..utils.api_response import success_response, error_response
+from ..utils.token import generate_token, verify_token, invalidate_token
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -196,7 +197,8 @@ async def upload_avatar(request: Request, file: UploadFile = File(...)):
 
     ext = Path(file.filename).suffix.lower() or ".png"
     filename = f"user_{user_id}_{int(time.time())}{ext}"
-    save_path = settings.AVATAR_DIR / filename
+    avatar_dir = settings.get_tenant_avatar_dir(str(user.tenant_id))
+    save_path = avatar_dir / filename
 
     content = await file.read()
     if len(content) > 2 * 1024 * 1024:
@@ -210,11 +212,19 @@ async def upload_avatar(request: Request, file: UploadFile = File(...)):
 
 
 @router.get("/avatar/{filename}", summary="获取头像文件")
-async def get_avatar(filename: str):
+async def get_avatar(filename: str, tenant_id: str = "1"):
     """返回头像文件"""
     from fastapi.responses import FileResponse
 
-    file_path = settings.AVATAR_DIR / filename
+    # 从文件名解析 tenant_id（格式：user_{tenant_id}_{timestamp}.ext）
+    parts = filename.split('_')
+    if len(parts) >= 2:
+        extracted_tenant_id = parts[1]
+    else:
+        extracted_tenant_id = tenant_id
+    
+    avatar_dir = settings.get_tenant_avatar_dir(extracted_tenant_id)
+    file_path = avatar_dir / filename
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="头像不存在")
 
