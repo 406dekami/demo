@@ -38,5 +38,8 @@ dependencies = [
 asyncio_mode = "auto"
 pythonpath = ["."]
 
+[tool.setuptools.packages.find]
+include = ["app*"]
+
 [tool.uvicorn]
 reload_dirs = ["app", "config"]
