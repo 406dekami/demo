@@ -1,28 +1,28 @@
 # Python
-/backend/.venv/
-/backend/__pycache__/
-/backend/**/*.pyc
-/backend/.pytest_cache/
+backend/.venv/
+backend/__pycache__/
+backend/**/*.pyc
+backend/.pytest_cache/
 
 # Node.js
 /my-rag-frontend/node_modules
 /my-rag-frontend/dist/
 
-# 数据库和存储
-/backend/storage/               # 系统存储（SQLite、ChromaDB）
-/backend/app/data/              # 用户数据（租户隔离）
-**/chroma.sqlite3               # ChromaDB 索引文件
-**/*.bin                        # ChromaDB 向量数据
+# 数据库和存储（系统存储、用户数据、向量库）
+backend/storage/
+backend/app/data/
+**/chroma.sqlite3
+**/*.bin
 
 # 日志
-/backend/logs/
+backend/logs/
 
 # 环境变量和配置
-/backend/.env
-/backend/.env.local
+backend/.env
+backend/.env.local
 
 # IDE
-/backend/.idea/
+backend/.idea/
 .vscode/
 *.swp
 *.swo
